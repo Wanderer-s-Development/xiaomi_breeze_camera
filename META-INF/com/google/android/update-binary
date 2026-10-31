@@ -183,13 +183,16 @@ unzip -o "$ZIP" "proprietary/*" -d "$EXTRACT_DIR" >/dev/null 2>&1
 
 SRC="$EXTRACT_DIR/proprietary"
 
-# 1. Product partition (MiuiCamera, breeze.xml, permissions)
+# 1. Product partition (MiuiCamera, breeze.xml, permissions, JNI libs)
 ui_print "- Installing MiuiCamera & 108MP device features to ${TARGET_PRODUCT}..."
-mkdir -p "$TARGET_PRODUCT/priv-app/MiuiCamera"
+mkdir -p "$TARGET_PRODUCT/priv-app/MiuiCamera/lib/arm64"
+mkdir -p "$TARGET_PRODUCT/lib64"
 mkdir -p "$TARGET_PRODUCT/etc/device_features"
 mkdir -p "$TARGET_PRODUCT/etc/permissions"
 
 cp -af "$SRC/product/priv-app/MiuiCamera/MiuiCamera.apk" "$TARGET_PRODUCT/priv-app/MiuiCamera/"
+cp -af "$SRC/system_ext/lib64/"* "$TARGET_PRODUCT/priv-app/MiuiCamera/lib/arm64/"
+cp -af "$SRC/system_ext/lib64/"* "$TARGET_PRODUCT/lib64/"
 cp -af "$SRC/product/etc/device_features/"* "$TARGET_PRODUCT/etc/device_features/"
 cp -af "$SRC/product/etc/permissions/"* "$TARGET_PRODUCT/etc/permissions/"
 
@@ -211,7 +214,7 @@ cp -af "$SRC/odm/etc/camera/"* "$TARGET_ODM/etc/camera/"
 
 # 4. Set permissions & SELinux contexts
 ui_print "- Setting file permissions & SELinux contexts..."
-for p in "$TARGET_PRODUCT/priv-app/MiuiCamera" "$TARGET_PRODUCT/etc/device_features" "$TARGET_SYSTEM_EXT/framework" "$TARGET_SYSTEM_EXT/lib64" "$TARGET_ODM/etc/camera"; do
+for p in "$TARGET_PRODUCT/priv-app/MiuiCamera" "$TARGET_PRODUCT/lib64" "$TARGET_PRODUCT/etc/device_features" "$TARGET_SYSTEM_EXT/framework" "$TARGET_SYSTEM_EXT/lib64" "$TARGET_ODM/etc/camera"; do
   find "$p" -type d -exec chmod 755 {} + 2>/dev/null || true
   find "$p" -type f -exec chmod 644 {} + 2>/dev/null || true
   find "$p" -exec chown root:root {} + 2>/dev/null || true

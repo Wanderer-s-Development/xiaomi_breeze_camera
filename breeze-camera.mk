@@ -34,6 +34,19 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/addon.d/70-miuicamera.sh:$(TARGET_COPY_OUT_SYSTEM)/addon.d/70-miuicamera.sh
 
+# JNI Libraries in Product for MiuiCamera
+PRODUCT_COPY_FILES += \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcameramind.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libcamera_algoup_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libcamera_mianode_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libcameraimpl.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libcameramind.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libopencl-camera.so
+
 # ODM & System_ext camera tuning configs
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(CAMERA_PATH)/proprietary/odm/etc/camera,$(TARGET_COPY_OUT_ODM)/etc/camera) \

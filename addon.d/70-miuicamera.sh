@@ -9,6 +9,16 @@
 list_files() {
 cat << 'LIST_EOF'
 product/priv-app/MiuiCamera/MiuiCamera.apk
+product/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so
+product/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so
+product/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so
+product/priv-app/MiuiCamera/lib/arm64/libcameramind.so
+product/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so
+product/lib64/libcamera_algoup_jni.xiaomi.so
+product/lib64/libcamera_mianode_jni.xiaomi.so
+product/lib64/libcameraimpl.so
+product/lib64/libcameramind.so
+product/lib64/libopencl-camera.so
 product/etc/device_features/breeze.xml
 product/etc/device_features/breeze_in.xml
 product/etc/device_features/breeze_p_in.xml
