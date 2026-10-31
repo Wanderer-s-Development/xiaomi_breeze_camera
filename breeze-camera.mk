@@ -30,6 +30,10 @@ PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/com.xiaomi.hardware.camera.companion.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/com.xiaomi.hardware.camera.companion.xml \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-cameraopt.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-cameraopt.xml
 
+# OTA Survival (addon.d)
+PRODUCT_COPY_FILES += \
+    $(CAMERA_PATH)/addon.d/70-miuicamera.sh:$(TARGET_COPY_OUT_SYSTEM)/addon.d/70-miuicamera.sh
+
 # ODM & System_ext camera tuning configs
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(CAMERA_PATH)/proprietary/odm/etc/camera,$(TARGET_COPY_OUT_ODM)/etc/camera) \

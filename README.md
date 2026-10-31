@@ -2,7 +2,7 @@
 
 Dual-purpose camera repository for **Redmi 13 5G / POCO M6 Plus 5G** (codename: `breeze` / `breeze_in`, Qualcomm Snapdragon 4 Gen 2 - SM4450):
 1. **Soong Build System Integration (`Android.bp`)**: Compile directly into AOSP custom ROMs (Project Infinity-X, LineageOS, etc.).
-2. **Recovery Flashable ZIP**: Flash via custom recovery (OrangeFox / TWRP) or Magisk/KernelSU/APatch.
+2. **AOSP Recovery Flashable Package**: Sideloadable via AOSP / Lineage / Project Infinity-X / TWRP Recovery with OTA survival (`addon.d`).
 
 Extracted directly from official stock HyperOS India firmware (`OS3.0.303.0.WNUINXM`).
 
@@ -53,23 +53,28 @@ Soong will automatically:
 
 ---
 
-## 2. Recovery Flashable ZIP (OrangeFox / TWRP)
+## 2. AOSP Recovery Flashable Package
 
-If you want a standalone flashable ZIP without compiling the ROM from source:
+If you want a standalone flashable package without rebuilding the ROM:
 
-### Generate the ZIP
+### Package Generation
 Run the build script in this repo:
 ```bash
 ./package.sh
 ```
 This generates `HyperOS_Camera_breeze_Recovery_Flashable.zip`.
 
-### Flashing
-1. Boot into **OrangeFox Recovery** or **TWRP**.
-2. Flash `HyperOS_Camera_breeze_Recovery_Flashable.zip`.
-3. Reboot to system.
+### Flashing via AOSP Recovery (or Lineage / Infinity-X / TWRP / OrangeFox)
+1. Reboot your device into Recovery mode.
+2. Select **Apply update** -> **Apply from ADB** (or install directly in TWRP/OrangeFox).
+3. From your computer, run:
+```bash
+adb sideload HyperOS_Camera_breeze_Recovery_Flashable.zip
+```
+4. Reboot system.
 
-*(Note: The generated ZIP is also flashable inside the Magisk / KernelSU / APatch manager apps).*
+### OTA Survival (addon.d v3)
+The installer deploys `addon.d/70-miuicamera.sh` into `/system/addon.d/`. This ensures all camera components, proprietary libraries, and configuration files automatically survive future AOSP / LineageOS / Project Infinity-X OTA ROM updates without needing to reflash.
 
 ---
 
@@ -77,26 +82,24 @@ This generates `HyperOS_Camera_breeze_Recovery_Flashable.zip`.
 
 ```
 .
+├── addon.d/                         # OTA backup/restore script
+│   └── 70-miuicamera.sh             # Addon.d v3 OTA survival script
 ├── Android.bp                       # Soong blueprint (android_app_import, java_import, cc_prebuilt)
 ├── breeze-camera.mk                 # Product makefile to inherit in device.mk
-├── package.sh                       # One-click script to package Recovery Flashable ZIP
+├── package.sh                       # Packaging script for AOSP Recovery Flashable ZIP
+├── toybox-arm64                     # Static POSIX binary bundled for AOSP recovery shell
 ├── sepolicy/                        # SELinux policies for ROM compilation
 │   ├── vendor/camera.te
 │   └── private/priv_app.te
-├── META-INF/com/google/android/     # Recovery installer
-│   ├── update-binary
-│   └── updater-script
-├── proprietary/                     # Raw proprietary files used by both Soong and Recovery
-│   ├── odm/etc/camera/              # Stock ODM booster JSONs
-│   ├── product/etc/device_features/ # Hardware sensor features (breeze.xml)
-│   ├── product/etc/permissions/     # Privapp permissions
-│   ├── product/priv-app/MiuiCamera/ # Stock 64-bit MiuiCamera.apk
-│   └── system_ext/                  # Framework jars & algo libraries
-├── customize.sh                     # Installer permissions
-├── module.prop                      # Module metadata
-├── post-fs-data.sh                  # Early-boot camera provider properties
-├── service.sh                       # Boot-completed property initialization
-└── sepolicy.rule                    # SELinux rules for recovery/magisk installer
+├── META-INF/com/google/android/     # AOSP recovery installer
+│   ├── update-binary                # Dynamic partition mapper & installer script
+│   └── updater-script               # Binary launcher stub
+└── proprietary/                     # Raw proprietary files used by both Soong and Recovery
+    ├── odm/etc/camera/              # Stock ODM booster JSONs
+    ├── product/etc/device_features/ # Hardware sensor features (breeze.xml)
+    ├── product/etc/permissions/     # Privapp permissions
+    ├── product/priv-app/MiuiCamera/ # Stock 64-bit MiuiCamera.apk
+    └── system_ext/                  # Framework jars & algo libraries
 ```
 
 ---

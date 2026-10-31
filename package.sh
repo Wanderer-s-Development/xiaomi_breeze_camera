@@ -14,6 +14,10 @@ cp -rf "$DIR/META-INF" "$TMP_DIR/"
 # Copy toybox-arm64 (for standalone POSIX environment in AOSP Recovery)
 cp -f "$DIR/toybox-arm64" "$TMP_DIR/"
 
+# Copy addon.d survival script
+mkdir -p "$TMP_DIR/addon.d"
+cp -rf "$DIR/addon.d/"* "$TMP_DIR/addon.d/"
+
 # Copy proprietary camera components
 mkdir -p "$TMP_DIR/proprietary"
 cp -rf "$DIR/proprietary/"* "$TMP_DIR/proprietary/"
