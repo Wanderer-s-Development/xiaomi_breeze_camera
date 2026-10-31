@@ -1,0 +1,284 @@
+{
+    "version": "1.0",
+    "CameraBooster": {
+        "support": {
+                "cam_boost_early_boost_perf": true,
+                "mem_limit_enable": true,
+                "cpuctrl_params_support": true,
+                "intercept_restart_enable": true
+            },
+        "threshold": {
+                "3rd_limit_threshold": 512000
+            },
+        "configs": [
+            {
+                "name": "intercept_restart_list",
+                "config": [
+                    "com.xiaomi.bsp.gps.nps",
+                    "com.android.settings:remote"
+                ]
+            },
+            {
+                "name": "start_black_list",
+                "config": [
+                    "com.mi.android.globalminusscreen:Metrica",
+                    "com.mi.android.globalminusscreen",
+                    "com.xiaomi.mipicks"
+                ]
+            }
+        ]
+    },
+    "Proc_Inhibit": {
+        "support": {
+                "inhibit_procs_enable": true,
+                "3rdcam_inhibit_enable": true,
+                "inhibit_ebpf_enable": true,
+                "inhibit_tokill_cgroup_support": true
+            },
+        "threshold": {
+                "restore_inhibit_delay_time": 2000,
+                "inhibit_gallery_scene_delayms": 3000
+            },
+        "cpus_configs": {
+            "limit-level0": "0-1",
+            "limit-level1": "0-2",
+            "limit-level2": "0-3",
+            "limit-level3": "0-4"
+        },
+        "configs": [
+            {
+                "name": "inhibit_app_list",
+                "config": [
+                    "com.google.android.providers.media.module",
+                    "com.sohu.inputmethod.sogou.xiaomi",
+                    "com.google.android.apps.chromecast.app",
+                    "com.google.android.apps.messaging",
+                    "com.instagram.android",
+                    "com.facebook.katana",
+                    "com.facebook.orca",
+                    "us.zoom.videomeetings",
+		    "com.whatsapp",
+		    "com.google.android.youtube"
+                ]
+            },
+            {
+                "name": "inhibit_sysapp_list",
+                "config": [
+                    "com.lbe.security.miui",
+                    "com.mi.health",
+                    "com.milink.service",
+                    "com.miui.analytics",
+                    "com.miui.daemon",
+                    "com.miui.mishare.connectivity",
+                    "com.miui.securitycenter",
+                    "com.miui.voiceassist",
+                    "com.qualcomm.qti.workloadclassifier",
+                    "com.xiaomi.bluetooth",
+                    "com.google.android.googlequicksearchbox:search"
+                ]
+            },
+            {
+                "name": "inhibit_native_list",
+                "config": [
+                    "logd",
+                    "diag-router",
+                    "cnss_diag",
+                    "dex2oat64",
+                    "mrmd",
+                    "tango_pretranslator",
+                    "traced",
+                    "traced_probes"
+                ]
+            },
+            {
+                "name": "skip_inhibit_native_list",
+                "config": [
+                    "sh",
+                    "kthreadd",
+                    "logcat",
+                    "dumpsys"
+                ]
+            },
+            {
+                "name": "inhibit_native_list_affinity",
+                "config": [
+                    "gzip",
+                    "traced",
+                    "traced_probes"
+                ]
+            },
+            {
+                "name": "intercept_restart_white_list",
+                "config": [
+                    "com.tencent.mm:push",
+                    "com.tencent.mm",
+                    "com.tencent.mobileqq:MSF",
+                    "com.tencent.mobileqq"
+                ]
+            }
+        ]
+    },
+    "QuickCamera": {
+        "hook_activities": [
+            "com.tencent.mm.plugin.scanner.ui.BaseScanUI",
+            "com.alipay.mobile.scan.as.main.MainCaptureActivity",
+            "com.alipay.mobile.scan.as.tool.ToolsCaptureActivity",
+            "com.ss.android.ugc.aweme.shortvideo.ui.scan.ScanNewActivity",
+            "com.xunmeng.pinduoduo.activity.NewPageActivity",
+            "com.etao.feimagesearch.capture.CaptureActivity",
+            "com.taobao.taobao.scancode.gateway.activity.ScancodeGatewayActivity",
+            "com.zhihu.android.qrscanner.ui.ScannerActivity",
+            "com.tencent.mobileqq.qrscan.activity.ScannerActivity",
+            "com.tencent.mobileqq.olympic.activity.ScanTorchActivity",
+            "com.baidu.searchbox.godeye.CodeScannerActivity",
+            "com.yxcorp.plugin.qrcode.api.QRCodeScanActivity",
+            "com.jd.lib.scan.lib.zxing.client.android.NewCaptureActivity",
+            "com.meituan.android.scan.ScanQRInMeituanActivity",
+            "com.meituan.android.bike.component.feature.qrcode.view.QRCodeScannerByMBarActivity",
+            "me.ele.scan.ui.ScanMainActivity",
+            "com.weico.international.activity.scan.ScanWebActivity",
+            "com.sina.weibo.qrcode.CaptureActivity",
+            "com.bilibili.app.qrcode.QRcodeCaptureActivity",
+            "com.xingin.redscanner.scanner.QrCodeScannerActivityV2",
+            "com.tencent.qqlive.qrcode.ui.ScanQRCustomActivity",
+            "com.taobao.ma.ui.ScanCombineActivity",
+            "com.light.beauty.publisher.PublisherCameraActivity",
+            "com.tencent.mm.plugin.recordvideo.activity.MMRecordUI",
+            "com.qiyi.scan.ARWrapperActivity"
+        ]
+    },
+
+    "PerfParams":{
+        "SM8650": {
+            "camera_app_launch_boost":[
+                    "0x40804100, 0xFFF,  //MPCTLV3_MAX_FREQ_CLUSTER_LITTLE_CORE_0, 0xFFF",
+                    "0x40800100, 0xFFF,  //MPCTLV3_MIN_FREQ_CLUSTER_LITTLE_CORE_0, 0xFFF",
+                    "0x40804000, 0xFFF,  //MPCTLV3_MAX_FREQ_CLUSTER_BIG_CORE_0, 0xFFF",
+                    "0x40800000, 0xFFF,  //MPCTLV3_MIN_FREQ_CLUSTER_BIG_CORE_0, 0xFFF",
+                    "0x42804000, 0x0,    //GPU - min pwrlevel 0 (freq 940 Mhz)",
+                    "0x43C28000, 4096,   //MPCTLV3_CPUCTL_TOPAPP_CPUSHARE,          4096"
+            ],
+            "display_on_resource": [
+                    "0x40000000, 1,      //Display on resource opcode, value"
+            ],
+            "camera_post_process_boost": [
+                    "0x43C24000, 4096,   //MPCTLV3_CPUCTL_CAMERA_CPUSHARE,          4096"
+            ],
+            "provider_restart_perf_lock_params": [
+                "0x40400000, 1,      //MPCTLV3_ALL_CPUS_PWR_CLPS_DIS, 1",
+                "0x40C00000, 1,      //MPCTLV3_SCHED_BOOST, 1",
+                "0x43C1C100, 2265600,//MPCTLV3_SCHED_FMAX_CAP_LITTLE , 2265600",
+                "0x43C1C000, 3148800,//MPCTLV3_SCHED_FMAX_CAP_BIG , 3148800",
+                "0x43C1C300, 2956800,//MPCTLV3_SCHED_FMAX_CAP_TITANIUM , 2956800",
+                "0x40804100, 2265,   //MPCTLV3_MAX_FREQ_CLUSTER_LITTLE_CORE_0, 2265",
+                "0x40800100, 2265,   //MPCTLV3_MIN_FREQ_CLUSTER_LITTLE_CORE_0, 2265",
+                "0x40804000, 3148,   //MPCTLV3_MAX_FREQ_CLUSTER_BIG_CORE_0, 3148",
+                "0x40800000, 3148,   //MPCTLV3_MIN_FREQ_CLUSTER_BIG_CORE_0, 3148",
+                "0x40804200, 3187,   //MPCTLV3_MAX_FREQ_CLUSTER_PLUS_CORE_0, 3187",
+                "0x40800200, 3187,   //MPCTLV3_MIN_FREQ_CLUSTER_PLUS_CORE_0, 3187",
+                "0x40804300, 3148,   //MPCTLV3_MAX_FREQ_CLUSTER_TITANIUM_CORE_0, 3148",
+                "0x40800300, 3148,   //MPCTLV3_MIN_FREQ_CLUSTER_TITANIUM_CORE_0 , 3148",
+                "0x43498000, 4224000,//MPCTLV3_BUS_DCVS_LLCC_DDR_BOOST_FREQ, 4224000",
+                "0x4349C000, 2035200,//MPCTLV3_BUS_DCVS_LLCC_L3_BOOST_FREQ, 2035200",
+                "0x434A0000, 1066000,//MPCTLV3_BUS_DCVS_LLCC_LLCC_BOOST_FREQ, 1066000"
+            ]
+        },
+        "SM8635": {
+            "camera_app_launch_boost": [
+                    "0x40804100, 0xFFF,  //MPCTLV3_MAX_FREQ_CLUSTER_LITTLE_CORE_0, 0xFFF",
+                    "0x40800100, 0xFFF,  //MPCTLV3_MIN_FREQ_CLUSTER_LITTLE_CORE_0, 0xFFF",
+                    "0x40804000, 0xFFF,  //MPCTLV3_MAX_FREQ_CLUSTER_BIG_CORE_0, 0xFFF",
+                    "0x40800000, 0xFFF,  //MPCTLV3_MIN_FREQ_CLUSTER_BIG_CORE_0, 0xFFF",
+                    "0x42804000, 0x0,    //GPU - min pwrlevel 0 (freq 940 Mhz)",
+                    "0x43C28000, 4096,   //MPCTLV3_CPUCTL_TOPAPP_CPUSHARE,          4096"
+            ],
+            "display_on_resource": [
+                    "0x40000000, 1,      //Display on resource opcode, value"
+            ],
+            "camera_post_process_boost": [
+                    "0x43C24000, 4096,   //MPCTLV3_CPUCTL_CAMERA_CPUSHARE,          4096"
+            ]
+        },
+        "SM8750": {
+            "camera_app_launch_boost": [
+                "0x40804000, 0xFFF,  //MPCTLV3_MAX_FREQ_CLUSTER_BIG_CORE_0, 0xFFF",
+                "0x40800000, 0xFFF,  //MPCTLV3_MIN_FREQ_CLUSTER_BIG_CORE_0, 0xFFF",
+                "0x40804200, 0xFFF,  //MPCTLV3_MAX_FREQ_CLUSTER_PRIME_CORE_0, 0xFFF",
+                "0x40800200, 0xFFF,  //MPCTLV3_MIN_FREQ_CLUSTER_PRIME_CORE_0, 0xFFF",
+                "0x42808000, 0x2,    //GPU - min pwrlevel 0 (freq 940 Mhz)"
+            ],
+            "display_on_resource": [
+                "0x40000000, 1,      //Display on resource opcode, value"
+            ],
+            "provider_restart_perf_lock_params": [
+                "0x40400000, 1,      //MPCTLV3_ALL_CPUS_PWR_CLPS_DIS, 1",
+                "0x40C00000, 1,      //MPCTLV3_SCHED_BOOST, 1",
+                "0x43C1C100, 2265600,//MPCTLV3_SCHED_FMAX_CAP_LITTLE , 2265600",
+                "0x43C1C000, 3148800,//MPCTLV3_SCHED_FMAX_CAP_BIG , 3148800",
+                "0x43C1C300, 2956800,//MPCTLV3_SCHED_FMAX_CAP_TITANIUM , 2956800",
+                "0x40804000, 4095,  //MPCTLV3_MAX_FREQ_CLUSTER_BIG_CORE_0, 4095",
+                "0x40800000, 4095,  //MPCTLV3_MIN_FREQ_CLUSTER_BIG_CORE_0, 4095",
+                "0x40804200, 4095,  //MPCTLV3_MAX_FREQ_CLUSTER_PRIME_CORE_0, 4095",
+                "0x40800200, 4095,  //MPCTLV3_MIN_FREQ_CLUSTER_PRIME_CORE_0, 4095",
+                "0x42808000, 2,  //MPCTLV3_GPU_MAX_POWER_LEVEL, 0x2",
+                "0x43498000, 4761000,//MPCTLV3_BUS_DCVS_LLCC_DDR_BOOST_FREQ, 4224000",
+                "0x434A0000, 1211000,//MPCTLV3_BUS_DCVS_LLCC_LLCC_BOOST_FREQ, 1211000"
+            ],
+            "camera_post_process_boost": [
+                "0x43C50000, 4096,   //MPCTLV3_CPUCTL_CAMERA_CPUSHARE,          4096"
+            ]
+        },
+        "O1_asic" : {
+            "provider_restart_perf_lock_params": [
+                "302, 3,                 //RES_WALT_SCHED_BOOST, 0x3",
+                "1, 1411200,             //RES_CPUFREQ_SCALING_MIN_FREQ_CLUSTER_0 1228800",
+                "2, 1795200,             //RES_CPUFREQ_SCALING_MAX_FREQ_CLUSTER_0 1603200",
+                "31, 1536000,            //RES_CPUFREQ_SCALING_MIN_FREQ_CLUSTER_1 1536000",
+                "32, 1891200,            //RES_CPUFREQ_SCALING_MAX_FREQ_CLUSTER_1 1718400",
+                "61, 2678400,            //RES_CPUFREQ_SCALING_MIN_FREQ_CLUSTER_2 2678400",
+                "62, 2928000,            //RES_CPUFREQ_SCALING_MAX_FREQ_CLUSTER_2 2928000",
+                "91, 2793600,            //RES_CPUFREQ_SCALING_MIN_FREQ_CLUSTER_3 2793600",
+                "92, 3043200,            //RES_CPUFREQ_SCALING_MAX_FREQ_CLUSTER_3 3264000"
+            ],
+            "camera_post_process_boost": [
+                "444, 4096,               //RES_CPUCTL_CAMERA_DAEMON_CPU_SHARES"
+            ]
+        }
+    },
+
+    "Dump": {
+        "support": {
+            "hprof_enable": false,
+            "reboot_shutdown_enable": false
+        },
+        "native_configs": {
+            "/system/bin/surfaceflinger": 675840,
+            "/vendor/bin/hw/vendor.qti.hardware.display.composer-service": 368640
+        },
+        "app_configs": {
+            "system": 798720,
+            "com.miui.home": 863200,
+            "com.android.systemui": 863200,
+            "com.miui.miwallpaper": 507200
+        },
+        "watermark_scale_factor_configs": {
+            "watermark_scale_factor_threshold": 150
+        }
+    },
+    "UserBehaviorManager": {
+        "support": {
+            "enable_tracker": false,
+            "enable_recovery": false
+        },
+        "threshold": {
+            "hours": 15,
+            "hours_diff1": 12,
+            "hours_diff2": 24
+        },
+        "provider_name_list": [
+            "vendor.qti.camera.provider-service",
+            "vendor.xring.camera.provider-service",
+            "camerahalserver"
+        ]
+    }
+}
