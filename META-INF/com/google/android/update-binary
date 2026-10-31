@@ -19,6 +19,10 @@ set_con() {
   chcon u:object_r:"$1":s0 "$2" 2>/dev/null || true
 }
 
+is_mounted() {
+  mountpoint -q "$1" 2>/dev/null || grep -q "[[:blank:]]$1[[:blank:]]" /proc/mounts 2>/dev/null
+}
+
 cleanup() {
   ui_print "- Unmounting partitions..."
   umount -l /odm 2>/dev/null || true
@@ -26,6 +30,8 @@ cleanup() {
   umount -l /system_ext 2>/dev/null || true
   umount -l "$SYSTEM_MNT" 2>/dev/null || true
   rm -rf "$TMP/breeze_cam" 2>/dev/null || true
+  rm -rf "$TMP/bin" 2>/dev/null || true
+  rm -f "$TMP/toybox-arm64" 2>/dev/null || true
 }
 
 error() {
@@ -61,7 +67,8 @@ fi
 
 # Locate Dynamic Partitions
 DYNAMIC_PARTITIONS=$(getprop ro.boot.dynamic_partitions)
-if [ "$DYNAMIC_PARTITIONS" = "true" ]; then
+if [ "$DYNAMIC_PARTITIONS" = "true" ] || [ -d "/dev/block/mapper" ]; then
+  DYNAMIC_PARTITIONS="true"
   BLK_PATH="/dev/block/mapper"
 else
   BLK_PATH="/dev/block/bootdevice/by-name"
@@ -70,13 +77,38 @@ fi
 SLOT_SUFFIX=$(getprop ro.boot.slot_suffix)
 [ -z "$SLOT_SUFFIX" ] && SLOT_SUFFIX="_a"
 
+get_block_for_mount_point() {
+  [ -f /etc/recovery.fstab ] && grep -v "^#" /etc/recovery.fstab | grep "[[:blank:]]$1[[:blank:]]" | tail -n1 | tr -s [:blank:] ' ' | cut -d' ' -f1
+}
+
 find_block() {
   local name="$1"
-  local dev="${BLK_PATH}/${name}${SLOT_SUFFIX}"
+  local fstab_entry=""
+  [ -f /etc/recovery.fstab ] && fstab_entry=$(get_block_for_mount_point "/$name")
+  [ -z "$fstab_entry" ] && [ "$name" = "system" ] && [ -f /etc/recovery.fstab ] && fstab_entry=$(get_block_for_mount_point "/")
+  [ -z "$fstab_entry" ] && [ "$name" = "system" ] && [ -f /etc/recovery.fstab ] && fstab_entry=$(get_block_for_mount_point "/system_root")
+
+  local dev
+  if [ "$DYNAMIC_PARTITIONS" = "true" ]; then
+    if [ -n "$fstab_entry" ]; then
+      dev="${BLK_PATH}/${fstab_entry}${SLOT_SUFFIX}"
+    else
+      dev="${BLK_PATH}/${name}${SLOT_SUFFIX}"
+    fi
+  else
+    if [ -n "$fstab_entry" ]; then
+      dev="${fstab_entry}${SLOT_SUFFIX}"
+    else
+      dev="${BLK_PATH}/${name}${SLOT_SUFFIX}"
+    fi
+  fi
+
   if [ -b "$dev" ]; then
     echo "$dev"
   elif [ -b "${BLK_PATH}/${name}" ]; then
     echo "${BLK_PATH}/${name}"
+  elif [ -n "$fstab_entry" ] && [ -b "$fstab_entry" ]; then
+    echo "$fstab_entry"
   fi
 }
 
@@ -89,16 +121,18 @@ ui_print "- Active Slot: ${SLOT_SUFFIX}"
 ui_print "- Mounting partitions..."
 
 # Unmount beforehand to avoid busy errors
-umount /system 2>/dev/null || true
-umount /product 2>/dev/null || true
-umount /system_ext 2>/dev/null || true
-umount /odm 2>/dev/null || true
+umount -l /system 2>/dev/null || umount -l /mnt/system 2>/dev/null || true
+umount -l /product 2>/dev/null || true
+umount -l /system_ext 2>/dev/null || true
+umount -l /odm 2>/dev/null || true
 
 # Disable read-only block device protection
-[ -n "$SYSTEM_BLOCK" ] && blockdev --setrw "$SYSTEM_BLOCK" 2>/dev/null || true
-[ -n "$PRODUCT_BLOCK" ] && blockdev --setrw "$PRODUCT_BLOCK" 2>/dev/null || true
-[ -n "$SYSTEM_EXT_BLOCK" ] && blockdev --setrw "$SYSTEM_EXT_BLOCK" 2>/dev/null || true
-[ -n "$ODM_BLOCK" ] && blockdev --setrw "$ODM_BLOCK" 2>/dev/null || true
+if [ "$DYNAMIC_PARTITIONS" = "true" ]; then
+  [ -n "$SYSTEM_BLOCK" ] && blockdev --setrw "$SYSTEM_BLOCK" 2>/dev/null || true
+  [ -n "$PRODUCT_BLOCK" ] && blockdev --setrw "$PRODUCT_BLOCK" 2>/dev/null || true
+  [ -n "$SYSTEM_EXT_BLOCK" ] && blockdev --setrw "$SYSTEM_EXT_BLOCK" 2>/dev/null || true
+  [ -n "$ODM_BLOCK" ] && blockdev --setrw "$ODM_BLOCK" 2>/dev/null || true
+fi
 
 SYSTEM_MNT="/mnt/system"
 mkdir -p "$SYSTEM_MNT"
@@ -108,6 +142,17 @@ fi
 
 SYSTEM_OUT="${SYSTEM_MNT}/system"
 [ ! -d "$SYSTEM_OUT" ] && SYSTEM_OUT="$SYSTEM_MNT"
+
+# Ignore block devices in case they are symlinks inside system
+if [ -L "${SYSTEM_MNT}/product" ] || [ -L "${SYSTEM_OUT}/product" ]; then
+  PRODUCT_BLOCK=""
+fi
+if [ -L "${SYSTEM_MNT}/system_ext" ] || [ -L "${SYSTEM_OUT}/system_ext" ]; then
+  SYSTEM_EXT_BLOCK=""
+fi
+if [ -L "${SYSTEM_MNT}/odm" ] || [ -L "${SYSTEM_OUT}/odm" ]; then
+  ODM_BLOCK=""
+fi
 
 # Mount product, system_ext, odm
 if [ -n "$PRODUCT_BLOCK" ]; then
@@ -136,7 +181,7 @@ SRC="$EXTRACT_DIR/proprietary"
 
 # 1. Product partition (MiuiCamera, breeze.xml, permissions)
 ui_print "- Installing MiuiCamera & 108MP device features..."
-if [ -d "/product" ] && mountpoint -q /product 2>/dev/null; then
+if is_mounted "/product"; then
   TARGET_PRODUCT="/product"
 else
   TARGET_PRODUCT="${SYSTEM_OUT}/product"
@@ -151,7 +196,7 @@ cp -af "$SRC/product/etc/permissions/"* "$TARGET_PRODUCT/etc/permissions/"
 
 # 2. System_ext partition (Framework jars, algo libraries, permissions)
 ui_print "- Installing Xiaomi framework dependencies & algorithms..."
-if [ -d "/system_ext" ] && mountpoint -q /system_ext 2>/dev/null; then
+if is_mounted "/system_ext"; then
   TARGET_SYSTEM_EXT="/system_ext"
 else
   TARGET_SYSTEM_EXT="${SYSTEM_OUT}/system_ext"
@@ -167,7 +212,7 @@ cp -af "$SRC/system_ext/etc/"*.json "$TARGET_SYSTEM_EXT/etc/" 2>/dev/null || tru
 
 # 3. ODM partition (Camera booster JSONs)
 ui_print "- Installing ODM camera boosters..."
-if [ -d "/odm" ] && mountpoint -q /odm 2>/dev/null; then
+if is_mounted "/odm"; then
   TARGET_ODM="/odm"
 else
   TARGET_ODM="${SYSTEM_OUT}/odm"
