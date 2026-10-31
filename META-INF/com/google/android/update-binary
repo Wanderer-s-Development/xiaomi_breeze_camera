@@ -145,6 +145,7 @@ fi
 
 SYSTEM_OUT="${SYSTEM_MNT}/system"
 [ ! -d "$SYSTEM_OUT" ] && SYSTEM_OUT="$SYSTEM_MNT"
+TARGET_SYSTEM="$SYSTEM_OUT"
 
 # Mount product, system_ext, odm under /mnt (always writable tmpfs in recovery)
 TARGET_PRODUCT="${SYSTEM_OUT}/product"
@@ -183,18 +184,30 @@ unzip -o "$ZIP" "proprietary/*" -d "$EXTRACT_DIR" >/dev/null 2>&1
 
 SRC="$EXTRACT_DIR/proprietary"
 
-# 1. Product partition (MiuiCamera, breeze.xml, permissions, JNI libs)
-ui_print "- Installing MiuiCamera & 108MP device features to ${TARGET_PRODUCT}..."
-mkdir -p "$TARGET_PRODUCT/priv-app/MiuiCamera/lib/arm64"
-mkdir -p "$TARGET_PRODUCT/lib64"
-mkdir -p "$TARGET_PRODUCT/etc/device_features"
-mkdir -p "$TARGET_PRODUCT/etc/permissions"
+# 1. System partition (MiuiCamera, breeze.xml, permissions, JNI libs, framework)
+ui_print "- Installing MiuiCamera & 108MP device features to ${TARGET_SYSTEM}..."
+mkdir -p "$TARGET_SYSTEM/priv-app/MiuiCamera/lib/arm64"
+mkdir -p "$TARGET_SYSTEM/lib64"
+mkdir -p "$TARGET_SYSTEM/etc/device_features"
+mkdir -p "$TARGET_SYSTEM/etc/permissions"
+mkdir -p "$TARGET_SYSTEM/framework"
 
-cp -af "$SRC/product/priv-app/MiuiCamera/MiuiCamera.apk" "$TARGET_PRODUCT/priv-app/MiuiCamera/"
-cp -af "$SRC/system_ext/lib64/"* "$TARGET_PRODUCT/priv-app/MiuiCamera/lib/arm64/"
-cp -af "$SRC/system_ext/lib64/"* "$TARGET_PRODUCT/lib64/"
+cp -af "$SRC/product/priv-app/MiuiCamera/MiuiCamera.apk" "$TARGET_SYSTEM/priv-app/MiuiCamera/"
+cp -af "$SRC/system_ext/lib64/"* "$TARGET_SYSTEM/priv-app/MiuiCamera/lib/arm64/"
+cp -af "$SRC/system_ext/lib64/"* "$TARGET_SYSTEM/lib64/"
+cp -af "$SRC/system_ext/framework/"* "$TARGET_SYSTEM/framework/"
+cp -af "$SRC/product/etc/device_features/"* "$TARGET_SYSTEM/etc/device_features/"
+cp -af "$SRC/product/etc/permissions/"* "$TARGET_SYSTEM/etc/permissions/"
+cp -af "$SRC/system_ext/etc/permissions/"* "$TARGET_SYSTEM/etc/permissions/"
+cp -af "$SRC/system_ext/etc/"*.json "$TARGET_SYSTEM/etc/" 2>/dev/null || true
+
+# Remove old /product copy so PackageManager binds directly to /system/priv-app
+rm -rf "$TARGET_PRODUCT/priv-app/MiuiCamera"
+rm -rf "$TARGET_PRODUCT/lib64/libcamera*"
+
+# Also maintain device_features in product for backward compat
+mkdir -p "$TARGET_PRODUCT/etc/device_features"
 cp -af "$SRC/product/etc/device_features/"* "$TARGET_PRODUCT/etc/device_features/"
-cp -af "$SRC/product/etc/permissions/"* "$TARGET_PRODUCT/etc/permissions/"
 
 # 2. System_ext partition (Framework jars, algo libraries, permissions)
 ui_print "- Installing Xiaomi framework dependencies & algorithms to ${TARGET_SYSTEM_EXT}..."
@@ -212,44 +225,9 @@ ui_print "- Installing ODM camera boosters to ${TARGET_ODM}..."
 mkdir -p "$TARGET_ODM/etc/camera"
 cp -af "$SRC/odm/etc/camera/"* "$TARGET_ODM/etc/camera/"
 
-# 4. Patch public.libraries.txt to expose system libraries to MiuiCamera linker namespace
-ui_print "- Configuring linker public libraries..."
-for pub in "${SYSTEM_OUT}/etc/public.libraries.txt" "${TARGET_PRODUCT}/etc/public.libraries.txt"; do
-  if [ -f "$pub" ]; then
-    for lib in \
-      libbinder.so \
-      libcamera_client.so \
-      libcamera_metadata.so \
-      libcutils.so \
-      libgui.so \
-      libutils.so \
-      libvndksupport.so \
-      libandroid_runtime.so \
-      libbase.so \
-      libmedia_jni_utils.so \
-      libui.so \
-      android.hidl.token@1.0-utils.so \
-      libc++.so \
-      libcrypto.so \
-      libxml2.so \
-      libopencl-camera.so \
-      libcamera_algoup_jni.xiaomi.so \
-      libcamera_mianode_jni.xiaomi.so \
-      libcameraimpl.so \
-      libcameramind.so; do
-      if ! grep -q "^$lib" "$pub"; then
-        echo "$lib" >> "$pub"
-      fi
-    done
-    chmod 644 "$pub" 2>/dev/null || true
-    chown root:root "$pub" 2>/dev/null || true
-    chcon -h u:object_r:system_file:s0 "$pub" 2>/dev/null || true
-  fi
-done
-
 # 4. Set permissions & SELinux contexts
 ui_print "- Setting file permissions & SELinux contexts..."
-for p in "$TARGET_PRODUCT/priv-app/MiuiCamera" "$TARGET_PRODUCT/lib64" "$TARGET_PRODUCT/etc/device_features" "$TARGET_SYSTEM_EXT/framework" "$TARGET_SYSTEM_EXT/lib64" "$TARGET_ODM/etc/camera"; do
+for p in "$TARGET_SYSTEM/priv-app/MiuiCamera" "$TARGET_SYSTEM/lib64" "$TARGET_SYSTEM/framework" "$TARGET_SYSTEM/etc/device_features" "$TARGET_SYSTEM_EXT/framework" "$TARGET_SYSTEM_EXT/lib64" "$TARGET_ODM/etc/camera"; do
   find "$p" -type d -exec chmod 755 {} + 2>/dev/null || true
   find "$p" -type f -exec chmod 644 {} + 2>/dev/null || true
   find "$p" -exec chown root:root {} + 2>/dev/null || true

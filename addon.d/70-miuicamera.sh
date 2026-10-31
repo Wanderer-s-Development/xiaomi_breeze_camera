@@ -8,17 +8,21 @@
 
 list_files() {
 cat << 'LIST_EOF'
-product/priv-app/MiuiCamera/MiuiCamera.apk
-product/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so
-product/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so
-product/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so
-product/priv-app/MiuiCamera/lib/arm64/libcameramind.so
-product/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so
-product/lib64/libcamera_algoup_jni.xiaomi.so
-product/lib64/libcamera_mianode_jni.xiaomi.so
-product/lib64/libcameraimpl.so
-product/lib64/libcameramind.so
-product/lib64/libopencl-camera.so
+priv-app/MiuiCamera/MiuiCamera.apk
+priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so
+priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so
+priv-app/MiuiCamera/lib/arm64/libcameraimpl.so
+priv-app/MiuiCamera/lib/arm64/libcameramind.so
+priv-app/MiuiCamera/lib/arm64/libopencl-camera.so
+lib64/libcamera_algoup_jni.xiaomi.so
+lib64/libcamera_mianode_jni.xiaomi.so
+lib64/libcameraimpl.so
+lib64/libcameramind.so
+lib64/libopencl-camera.so
+etc/device_features/breeze.xml
+etc/device_features/breeze_in.xml
+etc/device_features/breeze_p_in.xml
+etc/permissions/privapp-permissions-com.android.camera.xml
 product/etc/device_features/breeze.xml
 product/etc/device_features/breeze_in.xml
 product/etc/device_features/breeze_p_in.xml
@@ -83,18 +87,5 @@ case "$1" in
       f="$S/addon.d/70-miuicamera.sh"
     fi
     chmod 755 "$f" 2>/dev/null || true
-
-    # Patch public.libraries.txt
-    PUB="$S/etc/public.libraries.txt"
-    if [ -f "$PUB" ]; then
-      for lib in libbinder.so libcamera_client.so libcamera_metadata.so libcutils.so libgui.so libutils.so libvndksupport.so libandroid_runtime.so libbase.so libmedia_jni_utils.so libui.so android.hidl.token@1.0-utils.so libc++.so libcrypto.so libxml2.so libopencl-camera.so libcamera_algoup_jni.xiaomi.so libcamera_mianode_jni.xiaomi.so libcameraimpl.so libcameramind.so; do
-        if ! grep -q "^$lib" "$PUB"; then
-          echo "$lib" >> "$PUB"
-        fi
-      done
-      chmod 644 "$PUB" 2>/dev/null || true
-      chown root:root "$PUB" 2>/dev/null || true
-      chcon -h u:object_r:system_file:s0 "$PUB" 2>/dev/null || true
-    fi
   ;;
 esac

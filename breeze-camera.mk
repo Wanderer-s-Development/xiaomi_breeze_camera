@@ -34,8 +34,18 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/addon.d/70-miuicamera.sh:$(TARGET_COPY_OUT_SYSTEM)/addon.d/70-miuicamera.sh
 
-# JNI Libraries in Product for MiuiCamera
+# JNI Libraries in System & Product for MiuiCamera
 PRODUCT_COPY_FILES += \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libcameramind.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcamera_algoup_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcamera_mianode_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcameraimpl.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcameramind.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libopencl-camera.so \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so \
@@ -64,7 +74,6 @@ PRODUCT_SYSTEM_PROPERTIES += \
     ro.product.mod_device=breeze_in \
     ro.miui.customized.region=india \
     ro.miui.notch=1 \
-    persist.sys.cam.skip_detach_image=true \
     ro.com.google.lens.oem_camera_package=com.android.camera
 
 # SEPolicy
