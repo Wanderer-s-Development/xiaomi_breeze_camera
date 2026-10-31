@@ -1,0 +1,122 @@
+//
+// Copyright (C) 2024 The LineageOS Project
+// Copyright (C) 2024 Wanderer's Development
+// SPDX-License-Identifier: Apache-2.0
+//
+
+soong_namespace {
+}
+
+android_app_import {
+    name: "MiuiCamera",
+    owner: "xiaomi",
+    apk: "proprietary/product/priv-app/MiuiCamera/MiuiCamera.apk",
+    overrides: ["Camera2", "Aperture"],
+    certificate: "platform",
+    dex_preopt: {
+        enabled: false,
+    },
+    privileged: true,
+    product_specific: true,
+}
+
+java_import {
+    name: "miui-framework",
+    owner: "xiaomi",
+    jars: ["proprietary/system_ext/framework/miui-framework.jar"],
+    system_ext_specific: true,
+}
+
+java_import {
+    name: "miui-cameraopt",
+    owner: "xiaomi",
+    jars: ["proprietary/system_ext/framework/miui-cameraopt.jar"],
+    system_ext_specific: true,
+}
+
+java_import {
+    name: "com.xiaomi.hardware.camera.companion-V1",
+    owner: "xiaomi",
+    jars: ["proprietary/system_ext/framework/com.xiaomi.hardware.camera.companion-V1.jar"],
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libcamera_algoup_jni.xiaomi",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libcamera_mianode_jni.xiaomi",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libcameraimpl",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libcameraimpl.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libcameramind",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libcameramind.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libopencl-camera",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libopencl-camera.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
