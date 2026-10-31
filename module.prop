@@ -1,6 +1,0 @@
-id=hyperos_camera_breeze
-name=HyperOS Camera (Redmi 13 5G / POCO M6 Plus 5G)
-version=v1.0
-versionCode=10
-author=wtf & Antigravity
-description=Stock HyperOS Camera extracted directly from official breeze firmware for AOSP Custom ROMs. Includes 108MP and Aux sensor support.

@@ -1,75 +1,266 @@
 #!/sbin/sh
-##########################################################################################
-# Universal Recovery Flashable + Magisk Module Installer
-# Compatible with OrangeFox Recovery, TWRP, Magisk, KernelSU, and APatch
-##########################################################################################
+#
+# AOSP Recovery Flashable Installer for HyperOS Camera (breeze)
+# Compatible with AOSP Recovery, Lineage Recovery, Project Infinity-X Recovery, TWRP, and OrangeFox
+#
 
-OUTFD=$2
-ZIPFILE=$3
-
-[ -z "$OUTFD" ] && OUTFD=1
-[ -z "$ZIPFILE" ] && ZIPFILE="$1"
+OUTFD="/proc/self/fd/$2"
+[ ! -e "$OUTFD" ] && OUTFD="/dev/null"
+ZIP="$3"
+[ -z "$ZIP" ] && ZIP="$1"
 
 ui_print() {
-    echo -e "ui_print $1\nui_print" >&$OUTFD
+  echo "ui_print $1" > "$OUTFD"
+  echo "ui_print" > "$OUTFD"
 }
 
-ui_print "********************************************************"
-ui_print "*      HyperOS Camera for breeze / breeze_in           *"
-ui_print "*    Redmi 13 5G / POCO M6 Plus 5G (Snapdragon 4 Gen 2)*"
-ui_print "*           Universal Recovery Flashable               *"
-ui_print "********************************************************"
+set_con() {
+  chcon -h u:object_r:"$1":s0 "$2" 2>/dev/null || true
+  chcon u:object_r:"$1":s0 "$2" 2>/dev/null || true
+}
 
-# Detect Environment
-MODID="hyperos_camera_breeze"
-MODPATH="/data/adb/modules/$MODID"
+cleanup() {
+  ui_print "- Unmounting partitions..."
+  umount -l /odm 2>/dev/null || true
+  umount -l /product 2>/dev/null || true
+  umount -l /system_ext 2>/dev/null || true
+  umount -l "$SYSTEM_MNT" 2>/dev/null || true
+  rm -rf "$TMP/breeze_cam" 2>/dev/null || true
+}
 
-ui_print "- Mounting partitions..."
-mount /data 2>/dev/null
-mount -o rw /data 2>/dev/null
+error() {
+  ui_print "Error: $1"
+  cleanup
+  exit 1
+}
 
-if [ ! -d "/data/adb" ]; then
-    mkdir -p /data/adb/modules
+ui_print "============================================"
+ui_print " HyperOS Camera for breeze (AOSP Recovery) "
+ui_print "   Redmi 13 5G / POCO M6 Plus 5G (SM4450)  "
+ui_print "============================================"
+
+TMP="/tmp"
+cd "$TMP" || exit 1
+
+# Extract toybox for full POSIX tooling in AOSP Recovery
+ui_print "- Setting up AOSP recovery environment..."
+unzip -o "$ZIP" "toybox-arm64" >/dev/null 2>&1
+TOYBOX="${TMP}/toybox-arm64"
+chmod +x "$TOYBOX" 2>/dev/null
+
+if [ -f "$TOYBOX" ]; then
+  TOYS_PATH="${TMP}/bin"
+  rm -rf "$TOYS_PATH"
+  mkdir -p "$TOYS_PATH"
+  $TOYBOX install -d "$TOYS_PATH" 2>/dev/null || true
+  for toy in $($TOYBOX 2>/dev/null); do
+    $TOYBOX ln -sf "$TOYBOX" "${TOYS_PATH}/${toy}" 2>/dev/null || true
+  done
+  PATH="${TOYS_PATH}:${PATH}"
 fi
 
-ui_print "- Preparing module path: $MODPATH"
-rm -rf "$MODPATH"
-mkdir -p "$MODPATH"
-
-# Extract zip contents into MODPATH
-ui_print "- Extracting camera components..."
-if command -v unzip >/dev/null 2>&1; then
-    unzip -o "$ZIPFILE" -x "META-INF/*" -d "$MODPATH" >/dev/null 2>&1
+# Locate Dynamic Partitions
+DYNAMIC_PARTITIONS=$(getprop ro.boot.dynamic_partitions)
+if [ "$DYNAMIC_PARTITIONS" = "true" ]; then
+  BLK_PATH="/dev/block/mapper"
 else
-    # Fallback to current directory if running inside Magisk installer
-    cp -af ./* "$MODPATH/" 2>/dev/null
+  BLK_PATH="/dev/block/bootdevice/by-name"
 fi
 
-# Set proper permissions
-ui_print "- Setting permissions..."
-chmod -R 755 "$MODPATH"
-find "$MODPATH/system" -type f -exec chmod 644 {} + 2>/dev/null
-chmod 755 "$MODPATH/service.sh" 2>/dev/null
-chmod 755 "$MODPATH/post-fs-data.sh" 2>/dev/null
+SLOT_SUFFIX=$(getprop ro.boot.slot_suffix)
+[ -z "$SLOT_SUFFIX" ] && SLOT_SUFFIX="_a"
 
-# Try mounting system rw if possible (for non-EROFS ROMs)
-mount -o rw,remount /system 2>/dev/null
-mount -o rw,remount /product 2>/dev/null
+find_block() {
+  local name="$1"
+  local dev="${BLK_PATH}/${name}${SLOT_SUFFIX}"
+  if [ -b "$dev" ]; then
+    echo "$dev"
+  elif [ -b "${BLK_PATH}/${name}" ]; then
+    echo "${BLK_PATH}/${name}"
+  fi
+}
 
-if [ -w "/product" ]; then
-    ui_print "- Writable system detected: Injecting directly into /product & /system..."
-    cp -rf "$MODPATH/system/"* / 2>/dev/null
+SYSTEM_BLOCK=$(find_block "system")
+PRODUCT_BLOCK=$(find_block "product")
+SYSTEM_EXT_BLOCK=$(find_block "system_ext")
+ODM_BLOCK=$(find_block "odm")
+
+ui_print "- Active Slot: ${SLOT_SUFFIX}"
+ui_print "- Mounting partitions..."
+
+# Unmount beforehand to avoid busy errors
+umount /system 2>/dev/null || true
+umount /product 2>/dev/null || true
+umount /system_ext 2>/dev/null || true
+umount /odm 2>/dev/null || true
+
+# Disable read-only block device protection
+[ -n "$SYSTEM_BLOCK" ] && blockdev --setrw "$SYSTEM_BLOCK" 2>/dev/null || true
+[ -n "$PRODUCT_BLOCK" ] && blockdev --setrw "$PRODUCT_BLOCK" 2>/dev/null || true
+[ -n "$SYSTEM_EXT_BLOCK" ] && blockdev --setrw "$SYSTEM_EXT_BLOCK" 2>/dev/null || true
+[ -n "$ODM_BLOCK" ] && blockdev --setrw "$ODM_BLOCK" 2>/dev/null || true
+
+SYSTEM_MNT="/mnt/system"
+mkdir -p "$SYSTEM_MNT"
+if ! mount -o rw "$SYSTEM_BLOCK" "$SYSTEM_MNT" 2>/dev/null; then
+  mount "$SYSTEM_BLOCK" "$SYSTEM_MNT" 2>/dev/null || error "Could not mount system partition!"
 fi
 
-# Touch update flag for Magisk/KernelSU
-touch "$MODPATH/update"
-rm -f "$MODPATH/disable"
-rm -f "$MODPATH/remove"
+SYSTEM_OUT="${SYSTEM_MNT}/system"
+[ ! -d "$SYSTEM_OUT" ] && SYSTEM_OUT="$SYSTEM_MNT"
 
-ui_print "********************************************************"
-ui_print "*   Installation Complete!                             *"
-ui_print "*   Camera features & 108MP support ready for breeze   *"
-ui_print "*   Reboot and enjoy your HyperOS Camera!              *"
-ui_print "********************************************************"
+# Mount product, system_ext, odm
+if [ -n "$PRODUCT_BLOCK" ]; then
+  mkdir -p /product
+  mount -o rw "$PRODUCT_BLOCK" /product 2>/dev/null || mount "$PRODUCT_BLOCK" /product 2>/dev/null || true
+fi
 
+if [ -n "$SYSTEM_EXT_BLOCK" ]; then
+  mkdir -p /system_ext
+  mount -o rw "$SYSTEM_EXT_BLOCK" /system_ext 2>/dev/null || mount "$SYSTEM_EXT_BLOCK" /system_ext 2>/dev/null || true
+fi
+
+if [ -n "$ODM_BLOCK" ]; then
+  mkdir -p /odm
+  mount -o rw "$ODM_BLOCK" /odm 2>/dev/null || mount "$ODM_BLOCK" /odm 2>/dev/null || true
+fi
+
+# Extract proprietary camera components
+ui_print "- Extracting camera components..."
+EXTRACT_DIR="${TMP}/breeze_cam"
+rm -rf "$EXTRACT_DIR"
+mkdir -p "$EXTRACT_DIR"
+unzip -o "$ZIP" "proprietary/*" -d "$EXTRACT_DIR" >/dev/null 2>&1
+
+SRC="$EXTRACT_DIR/proprietary"
+
+# 1. Product partition (MiuiCamera, breeze.xml, permissions)
+ui_print "- Installing MiuiCamera & 108MP device features..."
+if [ -d "/product" ] && mountpoint -q /product 2>/dev/null; then
+  TARGET_PRODUCT="/product"
+else
+  TARGET_PRODUCT="${SYSTEM_OUT}/product"
+fi
+mkdir -p "$TARGET_PRODUCT/priv-app/MiuiCamera"
+mkdir -p "$TARGET_PRODUCT/etc/device_features"
+mkdir -p "$TARGET_PRODUCT/etc/permissions"
+
+cp -af "$SRC/product/priv-app/MiuiCamera/MiuiCamera.apk" "$TARGET_PRODUCT/priv-app/MiuiCamera/"
+cp -af "$SRC/product/etc/device_features/"* "$TARGET_PRODUCT/etc/device_features/"
+cp -af "$SRC/product/etc/permissions/"* "$TARGET_PRODUCT/etc/permissions/"
+
+# 2. System_ext partition (Framework jars, algo libraries, permissions)
+ui_print "- Installing Xiaomi framework dependencies & algorithms..."
+if [ -d "/system_ext" ] && mountpoint -q /system_ext 2>/dev/null; then
+  TARGET_SYSTEM_EXT="/system_ext"
+else
+  TARGET_SYSTEM_EXT="${SYSTEM_OUT}/system_ext"
+fi
+mkdir -p "$TARGET_SYSTEM_EXT/framework"
+mkdir -p "$TARGET_SYSTEM_EXT/lib64"
+mkdir -p "$TARGET_SYSTEM_EXT/etc/permissions"
+
+cp -af "$SRC/system_ext/framework/"* "$TARGET_SYSTEM_EXT/framework/"
+cp -af "$SRC/system_ext/lib64/"* "$TARGET_SYSTEM_EXT/lib64/"
+cp -af "$SRC/system_ext/etc/permissions/"* "$TARGET_SYSTEM_EXT/etc/permissions/"
+cp -af "$SRC/system_ext/etc/"*.json "$TARGET_SYSTEM_EXT/etc/" 2>/dev/null || true
+
+# 3. ODM partition (Camera booster JSONs)
+ui_print "- Installing ODM camera boosters..."
+if [ -d "/odm" ] && mountpoint -q /odm 2>/dev/null; then
+  TARGET_ODM="/odm"
+else
+  TARGET_ODM="${SYSTEM_OUT}/odm"
+fi
+mkdir -p "$TARGET_ODM/etc/camera"
+cp -af "$SRC/odm/etc/camera/"* "$TARGET_ODM/etc/camera/"
+
+# 4. Set permissions & SELinux contexts
+ui_print "- Setting file permissions & SELinux contexts..."
+for p in "$TARGET_PRODUCT/priv-app/MiuiCamera" "$TARGET_PRODUCT/etc/device_features" "$TARGET_SYSTEM_EXT/framework" "$TARGET_SYSTEM_EXT/lib64" "$TARGET_ODM/etc/camera"; do
+  find "$p" -type d -exec chmod 755 {} + 2>/dev/null || true
+  find "$p" -type f -exec chmod 644 {} + 2>/dev/null || true
+  find "$p" -exec chown root:root {} + 2>/dev/null || true
+  find "$p" -exec chcon -h u:object_r:system_file:s0 {} + 2>/dev/null || true
+done
+
+# 5. Install addon.d survival script
+ui_print "- Creating OTA survival script (addon.d)..."
+mkdir -p "${SYSTEM_OUT}/addon.d"
+ADDOND_SCRIPT="${SYSTEM_OUT}/addon.d/70-miuicamera.sh"
+cat << 'ADDON_EOF' > "$ADDOND_SCRIPT"
+#!/sbin/sh
+#
+# ADDOND_VERSION=3
+# /system/addon.d/70-miuicamera.sh
+#
+. /tmp/backuptool.functions
+
+list_files() {
+cat << 'LIST_EOF'
+product/priv-app/MiuiCamera/MiuiCamera.apk
+product/etc/device_features/breeze.xml
+product/etc/device_features/breeze_in.xml
+product/etc/device_features/breeze_p_in.xml
+product/etc/permissions/privapp-permissions-com.android.camera.xml
+system_ext/framework/miui-framework.jar
+system_ext/framework/miui-cameraopt.jar
+system_ext/framework/com.xiaomi.hardware.camera.companion-V1.jar
+system_ext/lib64/libcamera_algoup_jni.xiaomi.so
+system_ext/lib64/libcamera_mianode_jni.xiaomi.so
+system_ext/lib64/libcameraimpl.so
+system_ext/lib64/libcameramind.so
+system_ext/lib64/libopencl-camera.so
+system_ext/etc/permissions/com.xiaomi.hardware.camera.companion.xml
+system_ext/etc/permissions/miui-cameraopt.xml
+system_ext/etc/cameracustomize.json
+system_ext/etc/cameraopt.json
+system_ext/etc/cameraopt_perf.json
+system_ext/etc/cameraopt_reclaim.json
+system_ext/etc/cameraopt_thirdParty.json
+system_ext/etc/camerascene.json
+odm/etc/camera/camerabooster.json
+odm/etc/camera/cameracustomize.json
+odm/etc/camera/cameraopt.json
+odm/etc/camera/cameraopt_perf.json
+odm/etc/camera/cameraopt_reclaim.json
+LIST_EOF
+}
+
+case "$1" in
+  backup)
+    list_files | while read FILE DUMMY; do
+      backup_file "$S/$FILE"
+    done
+  ;;
+  restore)
+    list_files | while read FILE REPLACEMENT; do
+      R=""
+      [ -n "$REPLACEMENT" ] && R="$S/$REPLACEMENT"
+      [ -f "$C/$S/$FILE" ] && restore_file "$S/$FILE" "$R"
+    done
+  ;;
+  pre-backup|post-backup|pre-restore)
+    # Stub
+  ;;
+  post-restore)
+    for i in $(list_files); do
+      f=$(get_output_path "$S/$i")
+      chown root:root "$f" 2>/dev/null || true
+      chmod 644 "$f" 2>/dev/null || true
+      chmod 755 "$(dirname "$f")" 2>/dev/null || true
+      chcon -h u:object_r:system_file:s0 "$f" 2>/dev/null || true
+    done
+  ;;
+esac
+ADDON_EOF
+chmod 755 "$ADDOND_SCRIPT" 2>/dev/null || true
+chown root:root "$ADDOND_SCRIPT" 2>/dev/null || true
+
+cleanup
+ui_print "============================================"
+ui_print " Installation Successful!                   "
+ui_print " 108MP & Aux camera features enabled.      "
+ui_print " Camera will survive future OTA updates.   "
+ui_print "============================================"
 exit 0

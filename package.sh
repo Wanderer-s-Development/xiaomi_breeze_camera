@@ -3,26 +3,24 @@ set -e
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUT_ZIP="$DIR/HyperOS_Camera_breeze_Recovery_Flashable.zip"
-TMP_DIR=$(mktemp -d /tmp/breeze_cam_zip.XXXXXX)
+TMP_DIR=$(mktemp -d /tmp/breeze_aosp_cam_zip.XXXXXX)
 
-echo "==> Packaging Recovery Flashable ZIP..."
+echo "==> Packaging AOSP Recovery Flashable ZIP..."
 trap "rm -rf $TMP_DIR" EXIT
 
-# Copy META-INF and scripts
+# Copy META-INF (with AOSP certs & update-binary)
 cp -rf "$DIR/META-INF" "$TMP_DIR/"
-cp -f "$DIR/customize.sh" "$TMP_DIR/"
-cp -f "$DIR/module.prop" "$TMP_DIR/"
-cp -f "$DIR/service.sh" "$TMP_DIR/"
-cp -f "$DIR/post-fs-data.sh" "$TMP_DIR/"
-cp -f "$DIR/sepolicy.rule" "$TMP_DIR/"
 
-# Copy proprietary files as system partition layout
-mkdir -p "$TMP_DIR/system"
-cp -rf "$DIR/proprietary/"* "$TMP_DIR/system/"
+# Copy toybox-arm64 (for standalone POSIX environment in AOSP Recovery)
+cp -f "$DIR/toybox-arm64" "$TMP_DIR/"
+
+# Copy proprietary camera components
+mkdir -p "$TMP_DIR/proprietary"
+cp -rf "$DIR/proprietary/"* "$TMP_DIR/proprietary/"
 
 # Create the ZIP
 cd "$TMP_DIR"
 zip -r9 "$OUT_ZIP" .
 
-echo "==> Done! Flashable ZIP generated at:"
+echo "==> Done! AOSP Recovery Flashable ZIP generated at:"
 echo "    $OUT_ZIP"
