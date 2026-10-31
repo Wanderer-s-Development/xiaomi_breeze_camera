@@ -83,5 +83,18 @@ case "$1" in
       f="$S/addon.d/70-miuicamera.sh"
     fi
     chmod 755 "$f" 2>/dev/null || true
+
+    # Patch public.libraries.txt
+    PUB="$S/etc/public.libraries.txt"
+    if [ -f "$PUB" ]; then
+      for lib in libbinder.so libcamera_client.so libcamera_metadata.so libcutils.so libgui.so libutils.so libvndksupport.so libandroid_runtime.so libbase.so libmedia_jni_utils.so libui.so android.hidl.token@1.0-utils.so libc++.so libcrypto.so libxml2.so libopencl-camera.so libcamera_algoup_jni.xiaomi.so libcamera_mianode_jni.xiaomi.so libcameraimpl.so libcameramind.so; do
+        if ! grep -q "^$lib" "$PUB"; then
+          echo "$lib" >> "$PUB"
+        fi
+      done
+      chmod 644 "$PUB" 2>/dev/null || true
+      chown root:root "$PUB" 2>/dev/null || true
+      chcon -h u:object_r:system_file:s0 "$PUB" 2>/dev/null || true
+    fi
   ;;
 esac

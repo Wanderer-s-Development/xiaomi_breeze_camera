@@ -212,6 +212,41 @@ ui_print "- Installing ODM camera boosters to ${TARGET_ODM}..."
 mkdir -p "$TARGET_ODM/etc/camera"
 cp -af "$SRC/odm/etc/camera/"* "$TARGET_ODM/etc/camera/"
 
+# 4. Patch public.libraries.txt to expose system libraries to MiuiCamera linker namespace
+ui_print "- Configuring linker public libraries..."
+for pub in "${SYSTEM_OUT}/etc/public.libraries.txt" "${TARGET_PRODUCT}/etc/public.libraries.txt"; do
+  if [ -f "$pub" ]; then
+    for lib in \
+      libbinder.so \
+      libcamera_client.so \
+      libcamera_metadata.so \
+      libcutils.so \
+      libgui.so \
+      libutils.so \
+      libvndksupport.so \
+      libandroid_runtime.so \
+      libbase.so \
+      libmedia_jni_utils.so \
+      libui.so \
+      android.hidl.token@1.0-utils.so \
+      libc++.so \
+      libcrypto.so \
+      libxml2.so \
+      libopencl-camera.so \
+      libcamera_algoup_jni.xiaomi.so \
+      libcamera_mianode_jni.xiaomi.so \
+      libcameraimpl.so \
+      libcameramind.so; do
+      if ! grep -q "^$lib" "$pub"; then
+        echo "$lib" >> "$pub"
+      fi
+    done
+    chmod 644 "$pub" 2>/dev/null || true
+    chown root:root "$pub" 2>/dev/null || true
+    chcon -h u:object_r:system_file:s0 "$pub" 2>/dev/null || true
+  fi
+done
+
 # 4. Set permissions & SELinux contexts
 ui_print "- Setting file permissions & SELinux contexts..."
 for p in "$TARGET_PRODUCT/priv-app/MiuiCamera" "$TARGET_PRODUCT/lib64" "$TARGET_PRODUCT/etc/device_features" "$TARGET_SYSTEM_EXT/framework" "$TARGET_SYSTEM_EXT/lib64" "$TARGET_ODM/etc/camera"; do
