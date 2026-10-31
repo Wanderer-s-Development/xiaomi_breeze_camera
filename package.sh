@@ -24,6 +24,7 @@ cp -rf "$DIR/proprietary/"* "$TMP_DIR/proprietary/"
 
 # Create the ZIP
 cd "$TMP_DIR"
+rm -f "$OUT_ZIP"
 zip -r9 "$OUT_ZIP" .
 
 echo "==> Done! AOSP Recovery Flashable ZIP generated at:"
