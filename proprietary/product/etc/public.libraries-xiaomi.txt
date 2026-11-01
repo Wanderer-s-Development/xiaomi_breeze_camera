@@ -1,8 +1,2 @@
 libcamera_algoup_jni.xiaomi.so 64 nopreload
 libcamera_mianode_jni.xiaomi.so 64 nopreload
-libcameraimpl.so 64 nopreload
-libcameramind.so 64 nopreload
-libcameraopt.so 64 nopreload
-libcameraopt_jni.so 64 nopreload
-libmicampostproc_client.so 64 nopreload
-vendor.xiaomi.hardware.campostproc@1.0.so 64 nopreload
