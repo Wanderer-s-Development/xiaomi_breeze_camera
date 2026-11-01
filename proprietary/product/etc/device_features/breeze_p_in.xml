@@ -499,6 +499,7 @@
     <string-array name="camera_adjust_picture_size_cmd_list_pro">
         <!-- camera id 0 add 12M HAL_PIXEL_FORMAT_RAW16 input -->
         <item>com.android.camera:0, add, 4000, 3000, 32, true</item>
+        <item>com.android.camera:0, add, 2000, 1500, 35, false</item>
         <!-- camera id 0 set sensor size 108M, camera id 1 set sensor size 13M -->
         <item>com.antutu:0, ssize, 12000, 9000;1, ssize, 4208, 3120</item>
         <item>com.antutu:0, iso, 50, 12800;1, iso, 50, 4000</item>
@@ -508,12 +509,16 @@
     <string-array name="camera_adjust_picture_size_cmd_list">
         <!-- camera id 0 add 12.5M HAL_PIXEL_FORMAT_RAW16 input -->
         <item>com.android.camera:0, add, 4080, 3072, 32, true</item>
+        <item>com.android.camera:0, add, 2000, 1500, 35, false</item>
         <!-- camera id 0 set sensor size 50M, camera id 1 set sensor size 8M -->
         <item>com.antutu:0, ssize, 8160, 6144;1, ssize, 3264, 2448</item>
         <item>com.antutu:0, iso, 50, 6400;1, iso, 50, 4800</item>
         <!-- camera id 1 limit picture-size <= 1920x1080 -->
         <item>com.tencent.mobileqq:1, limit, 1920, 1080</item>
     </string-array>
+    <!-- whether support parallel camera capture -->
+    <bool name="is_support_parallel_camera">false</bool>
+    <bool name="support_parallel_process">false</bool>
     <!--Successful flag of camera continuous auto focus  result-->
     <integer name="camera_focus_success_flag">2</integer>
     <!--total steps number of camera compensation-->

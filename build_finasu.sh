@@ -24,8 +24,8 @@ echo "==> Creating module metadata..."
 cat << 'EOF' > "$BUILD_DIR/module.prop"
 id=hyperos_camera_breeze
 name=HyperOS Camera (breeze)
-version=v1.2
-versionCode=120
+version=v1.3
+versionCode=130
 author=Wanderer-s-Development
 description=Stock Xiaomi HyperOS Camera (108MP) with native algorithms, camcorder media profiles, and device features for Redmi 13 5G / POCO M6 Plus 5G (breeze). Built for FinaSU / KernelSU / APatch / Magisk.
 EOF
@@ -115,7 +115,9 @@ resetprop -n ro.product.mod_device "breeze_in_global"
 resetprop -n ro.miui.customized.region "india"
 resetprop -n ro.miui.notch "1"
 resetprop -n persist.sys.miui.camera.protect_prev_ext "true"
-resetprop -n vendor.camera.support.mivi "true"
+resetprop -n vendor.camera.support.mivi "false"
+resetprop -n camera.debug.mivi2 "false"
+resetprop -n persist.vendor.camera.mivi.version "1"
 resetprop -n hypercamera.disable_app_default_config "true"
 resetprop -n ro.com.google.lens.oem_camera_package "com.android.camera"
 EOF
@@ -124,6 +126,11 @@ chmod 755 "$BUILD_DIR/service.sh"
 cat << 'EOF' > "$BUILD_DIR/post-fs-data.sh"
 #!/system/bin/sh
 MODDIR=${0%/*}
+
+# Early property overrides to disable MIVI2 offline queue
+resetprop -n camera.debug.mivi2 "false"
+resetprop -n persist.vendor.camera.mivi.version "1"
+resetprop -n vendor.camera.support.mivi "false"
 
 # Disable KernelSU mount namespace isolation
 if [ -x /data/adb/ksud ]; then
