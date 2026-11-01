@@ -188,9 +188,16 @@ if [ -d "$SRC/vendor/etc" ]; then
   cp -af "$SRC/vendor/etc/"* "$BUILD_DIR/system/vendor/etc/"
 fi
 
+if [ -f "$SRC/product/etc/public.libraries.txt" ]; then
+  mkdir -p "$BUILD_DIR/system/product/etc" "$BUILD_DIR/system/etc"
+  cp -af "$SRC/product/etc/public.libraries.txt" "$BUILD_DIR/system/product/etc/public.libraries.txt"
+  cp -af "$SRC/product/etc/public.libraries.txt" "$BUILD_DIR/system/etc/public.libraries.txt"
+fi
+
 if [ -f "$SRC/product/etc/public.libraries-xiaomi.txt" ]; then
-  mkdir -p "$BUILD_DIR/system/product/etc"
+  mkdir -p "$BUILD_DIR/system/product/etc" "$BUILD_DIR/system/etc"
   cp -af "$SRC/product/etc/public.libraries-xiaomi.txt" "$BUILD_DIR/system/product/etc/public.libraries-xiaomi.txt"
+  cp -af "$SRC/product/etc/public.libraries-xiaomi.txt" "$BUILD_DIR/system/etc/public.libraries-xiaomi.txt"
 fi
 
 # 8. Vendor HAL fixes
