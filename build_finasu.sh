@@ -24,8 +24,8 @@ echo "==> Creating module metadata..."
 cat << 'EOF' > "$BUILD_DIR/module.prop"
 id=hyperos_camera_breeze
 name=HyperOS Camera (breeze)
-version=v1.3
-versionCode=130
+version=v1.4
+versionCode=140
 author=Wanderer-s-Development
 description=Stock Xiaomi HyperOS Camera (108MP) with native algorithms, camcorder media profiles, and device features for Redmi 13 5G / POCO M6 Plus 5G (breeze). Built for FinaSU / KernelSU / APatch / Magisk.
 EOF
@@ -115,9 +115,9 @@ resetprop -n ro.product.mod_device "breeze_in_global"
 resetprop -n ro.miui.customized.region "india"
 resetprop -n ro.miui.notch "1"
 resetprop -n persist.sys.miui.camera.protect_prev_ext "true"
-resetprop -n vendor.camera.support.mivi "false"
 resetprop -n camera.debug.mivi2 "false"
 resetprop -n persist.vendor.camera.mivi.version "1"
+resetprop -n vendor.camera.support.mivi "false"
 resetprop -n hypercamera.disable_app_default_config "true"
 resetprop -n ro.com.google.lens.oem_camera_package "com.android.camera"
 EOF
@@ -188,9 +188,9 @@ if [ -d "$SRC/vendor/etc" ]; then
   cp -af "$SRC/vendor/etc/"* "$BUILD_DIR/system/vendor/etc/"
 fi
 
-if [ -f "$SRC/product/etc/public.libraries.txt" ]; then
-  cp -af "$SRC/product/etc/public.libraries.txt" "$BUILD_DIR/system/product/etc/public.libraries.txt"
-  cp -af "$SRC/product/etc/public.libraries.txt" "$BUILD_DIR/system/etc/public.libraries.txt"
+if [ -f "$SRC/product/etc/public.libraries-xiaomi.txt" ]; then
+  mkdir -p "$BUILD_DIR/system/product/etc"
+  cp -af "$SRC/product/etc/public.libraries-xiaomi.txt" "$BUILD_DIR/system/product/etc/public.libraries-xiaomi.txt"
 fi
 
 # 8. Vendor HAL fixes
