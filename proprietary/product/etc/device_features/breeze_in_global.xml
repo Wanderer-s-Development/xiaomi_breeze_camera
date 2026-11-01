@@ -500,7 +500,6 @@
         <!-- camera id 0 add 12M HAL_PIXEL_FORMAT_RAW16 input -->
         <item>com.android.camera:0, add, 4000, 3000, 32, true</item>
         <!-- camera id 0 add intermediate YUV_420_888 stream for Ultra HD (108MP) -->
-        <item>com.android.camera:0, add, 2000, 1500, 35, false</item>
         <!-- camera id 0 set sensor size 108M, camera id 1 set sensor size 13M -->
         <item>com.antutu:0, ssize, 12000, 9000;1, ssize, 4208, 3120</item>
         <item>com.antutu:0, iso, 50, 12800;1, iso, 50, 4000</item>
