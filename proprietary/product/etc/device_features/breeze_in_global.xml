@@ -501,10 +501,6 @@
         <item>com.android.camera:0, add, 4000, 3000, 32, true</item>
         <!-- camera id 0 add intermediate YUV_420_888 stream for Ultra HD (108MP) -->
         <item>com.android.camera:0, add, 2000, 1500, 35, false</item>
-        <!-- camera id 0 add 108MP full sensor output streams -->
-        <item>com.android.camera:0, add, 12000, 9000, 256, false</item>
-        <item>com.android.camera:0, add, 12000, 9000, 35, false</item>
-        <item>com.android.camera:0, add, 12000, 9000, 32, false</item>
         <!-- camera id 0 set sensor size 108M, camera id 1 set sensor size 13M -->
         <item>com.antutu:0, ssize, 12000, 9000;1, ssize, 4208, 3120</item>
         <item>com.antutu:0, iso, 50, 12800;1, iso, 50, 4000</item>
@@ -514,12 +510,6 @@
     <string-array name="camera_adjust_picture_size_cmd_list">
         <!-- camera id 0 add 12.5M HAL_PIXEL_FORMAT_RAW16 input -->
         <item>com.android.camera:0, add, 4080, 3072, 32, true</item>
-        <!-- camera id 0 add intermediate YUV_420_888 stream for Ultra HD (108MP) -->
-        <item>com.android.camera:0, add, 2000, 1500, 35, false</item>
-        <!-- camera id 0 add 108MP full sensor output streams -->
-        <item>com.android.camera:0, add, 12000, 9000, 256, false</item>
-        <item>com.android.camera:0, add, 12000, 9000, 35, false</item>
-        <item>com.android.camera:0, add, 12000, 9000, 32, false</item>
         <!-- camera id 0 set sensor size 50M, camera id 1 set sensor size 8M -->
         <item>com.antutu:0, ssize, 8160, 6144;1, ssize, 3264, 2448</item>
         <item>com.antutu:0, iso, 50, 6400;1, iso, 50, 4800</item>
