@@ -120,3 +120,166 @@ cc_prebuilt_library_shared {
     check_elf_files: false,
     system_ext_specific: true,
 }
+
+cc_prebuilt_library_shared {
+    name: "libcameradngimpl",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libcameradngimpl.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libcameraopt",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libcameraopt.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libcameraopt_jni",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libcameraopt_jni.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libhidltransport.xiaomi",
+    stem: "libhidltransport",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libhidltransport.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libmicampostproc_client",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libmicampostproc_client.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libmodemenhance_aidl_client",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libmodemenhance_aidl_client.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "libmqsas",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/libmqsas.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "vendor.xiaomi.hardware.campostproc@1.0-system_ext",
+    stem: "vendor.xiaomi.hardware.campostproc@1.0",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/system_ext/lib64/vendor.xiaomi.hardware.campostproc@1.0.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    system_ext_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "com.qti.feature2.gs.netrani",
+    owner: "qcom",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/vendor/lib64/com.qti.feature2.gs.netrani.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    soc_specific: true,
+}
+
+cc_prebuilt_library_shared {
+    name: "com.xiaomi.plugin.morphohdr",
+    owner: "xiaomi",
+    strip: {
+        none: true,
+    },
+    target: {
+        android_arm64: {
+            srcs: ["proprietary/vendor/lib64/com.xiaomi.plugin.morphohdr.so"],
+        },
+    },
+    compile_multilib: "64",
+    check_elf_files: false,
+    soc_specific: true,
+}
+

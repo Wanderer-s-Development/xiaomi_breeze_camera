@@ -4,7 +4,7 @@
 > **Chipset**: Qualcomm Snapdragon 4 Gen 2 (SM4450)  
 > **Camera Sensor**: Samsung HM6 108MP (12000x9000, 3x3 nona-binning -> 4000x3000 12MP)  
 > **Operating System**: Project Infinity-X (Android 17 / SDK 37, Linux Kernel 5.10.266)  
-> **Root / Environment**: KernelSU (`ksu:s0`), SELinux strictly **Enforcing**  
+> **Environment**: Project Infinity-X (Android 17 / SDK 37), SELinux strictly **Enforcing**  
 > **ADB Device Serial**: `be900bb`  
 > **Git Repository**: `/home/wtf/Projects/hyperos_camera_breeze` (branch `main`, tag `v1.4-photo-stable`)  
 
@@ -12,7 +12,7 @@
 
 ## 1. Executive Summary & Objective
 
-The objective of this project is to provide a 100% stable, fully native Xiaomi HyperOS Camera (`com.android.camera`) port for Redmi 13 5G / POCO M6 Plus 5G running Android 17 (Project Infinity-X) via a KernelSU/Magisk module (`HyperOS_Camera_breeze_FinaSU.zip`).
+The objective of this project is to provide a 100% stable, fully native Xiaomi HyperOS Camera (`com.android.camera`) port for Redmi 13 5G / POCO M6 Plus 5G running Android 17 (Project Infinity-X) via native AOSP Soong ROM compilation (`Android.bp` & `breeze-camera.mk`).
 
 ### Current Status:
 - **Offline Shutter Lag**: **100% Solved** and verified. Patched native libraries (`libcamera_algoup_jni.xiaomi.so`, `libcamera_mianode_jni.xiaomi.so`) for Android 17 vtable shift (`Surface::connect` offset `0xAD` -> `0xA9`). Bypassed MIVI offline daemon queue in `service.sh`. Normal Photo mode captures instantaneous photos with zero shutter lag.
@@ -158,17 +158,12 @@ python3 patch_camera.py
 Run these commands to instantly update and test on the connected phone (`be900bb`):
 
 ```bash
-# 1. Push patched APK to temp
-adb push /tmp/MiuiCamera_patched_final.apk /data/local/tmp/MiuiCamera.apk
+# 1. Package recovery zip
+./package.sh
 
-# 2. Overwrite in Magisk/KernelSU module & bind-mount over system
-adb shell su -c "cp -af /data/local/tmp/MiuiCamera.apk /data/adb/modules/hyperos_camera_breeze/system/product/priv-app/MiuiCamera/MiuiCamera.apk"
-adb shell su -c "chown root:root /data/adb/modules/hyperos_camera_breeze/system/product/priv-app/MiuiCamera/MiuiCamera.apk && chmod 644 /data/adb/modules/hyperos_camera_breeze/system/product/priv-app/MiuiCamera/MiuiCamera.apk && chcon u:object_r:system_file:s0 /data/adb/modules/hyperos_camera_breeze/system/product/priv-app/MiuiCamera/MiuiCamera.apk"
-adb shell su -c "mount --bind /data/adb/modules/hyperos_camera_breeze/system/product/priv-app/MiuiCamera/MiuiCamera.apk /product/priv-app/MiuiCamera/MiuiCamera.apk"
-
-# 3. Clear ART cache and restart camera process
-adb shell su -c "pkill -9 -f com.android.camera"
-adb shell su -c "rm -rf /data/dalvik-cache/arm64/*MiuiCamera*"
+# 2. Sideload via AOSP Recovery
+adb reboot sideload
+adb sideload /home/wtf/Downloads/HyperOS_Camera_breeze_Recovery_Flashable.zip
 ```
 
 ### 5.3 Automated Ultra HD Live Testing
@@ -200,26 +195,27 @@ adb shell "ls -la /sdcard/DCIM/Camera/"
 ### 5.4 Final Flashable ZIP Packaging
 Once verified:
 ```bash
-cp /tmp/MiuiCamera_patched_final.apk /home/wtf/Projects/hyperos_camera_breeze/proprietary/product/priv-app/MiuiCamera/MiuiCamera.apk
-cd /home/wtf/Projects/hyperos_camera_breeze
-./build_finasu.sh
+./package.sh
 ```
-This produces `HyperOS_Camera_breeze_FinaSU.zip` ready for flashing.
+This produces `HyperOS_Camera_breeze_Recovery_Flashable.zip` ready for flashing via AOSP Recovery (`adb sideload`).
 
 ---
 
 ## 6. Critical Files & Repo Directory Layout
 
 ```text
-/home/wtf/Projects/hyperos_camera_breeze/
-├── build_finasu.sh               # Master KernelSU module packaging script
-├── patch_camera.py               # In-place DEX bytecode patcher & CRC updater
-├── HyperOS_Camera_breeze_FinaSU.zip # Generated flashable module ZIP
-├── sepolicy.rule                 # SELinux rules for Enforcing mode
+/home/wtf/Projects/xiaomi_breeze_camera/
+├── package.sh                    # Master AOSP Recovery ZIP packaging script
+├── HyperOS_Camera_breeze_Recovery_Flashable.zip # Generated flashable module ZIP
+├── Android.bp                    # Soong build system blueprint
+├── breeze-camera.mk              # Product makefile for ROM compilation
+├── addon.d/70-miuicamera.sh      # OTA survival script
+├── sepolicy/                     # SELinux rules for Enforcing mode
+├── META-INF/                     # AOSP Recovery installer
 ├── proprietary/
 │   ├── product/
 │   │   ├── priv-app/MiuiCamera/
-│   │   │   └── MiuiCamera.apk    # Stock/patched HyperOS camera app
+│   │   │   └── MiuiCamera.apk    # Stock HyperOS camera app
 │   │   └── etc/device_features/
 │   │       ├── breeze.xml        # Device feature configurations
 │   │       └── breeze_in.xml

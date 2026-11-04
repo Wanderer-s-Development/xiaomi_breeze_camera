@@ -1,0 +1,4 @@
+binder_call(hal_camera_default, priv_app)
+binder_call(hal_camera_default, platform_app)
+allow hal_camera_default priv_app:fd use;
+allow hal_camera_default platform_app:fd use;

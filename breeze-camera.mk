@@ -16,13 +16,25 @@ PRODUCT_PACKAGES += \
     libcamera_mianode_jni.xiaomi \
     libcameraimpl \
     libcameramind \
-    libopencl-camera
+    libopencl-camera \
+    libcameradngimpl \
+    libcameraopt \
+    libcameraopt_jni \
+    libhidltransport.xiaomi \
+    libmicampostproc_client \
+    libmodemenhance_aidl_client \
+    libmqsas \
+    vendor.xiaomi.hardware.campostproc@1.0-system_ext \
+    com.qti.feature2.gs.netrani \
+    com.xiaomi.plugin.morphohdr
 
 # Device Features (breeze 108MP HM6 support)
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze.xml \
     $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_in.xml \
-    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_p_in.xml
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_p_in.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_in_pa.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_in_global.xml
 
 # Permissions
 PRODUCT_COPY_FILES += \
@@ -30,32 +42,28 @@ PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/com.xiaomi.hardware.camera.companion.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/com.xiaomi.hardware.camera.companion.xml \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-cameraopt.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-cameraopt.xml
 
-# OTA Survival (addon.d)
+# Linker Namespace Public Libraries
 PRODUCT_COPY_FILES += \
-    $(CAMERA_PATH)/addon.d/70-miuicamera.sh:$(TARGET_COPY_OUT_SYSTEM)/addon.d/70-miuicamera.sh
+    $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_PRODUCT)/etc/public.libraries.txt \
+    $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/public.libraries.txt \
+    $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_PRODUCT)/etc/public.libraries-xiaomi.txt \
+    $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/public.libraries-xiaomi.txt
 
-# JNI Libraries in System & Product for MiuiCamera
+# Media Profiles
 PRODUCT_COPY_FILES += \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libcameramind.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcamera_algoup_jni.xiaomi.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcamera_mianode_jni.xiaomi.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcameraimpl.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcameramind.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libopencl-camera.so \
+    $(CAMERA_PATH)/proprietary/system/etc/media_profiles.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/media_profiles.xml \
+    $(CAMERA_PATH)/proprietary/system/etc/media_profiles_V1_0.dtd:$(TARGET_COPY_OUT_SYSTEM)/etc/media_profiles_V1_0.dtd \
+    $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles.xml \
+    $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles_V1_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles_V1_0.xml \
+    $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles_ravelin.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles_ravelin.xml
+
+# JNI Libraries for MiuiCamera App
+PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcameramind.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libcamera_algoup_jni.xiaomi.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libcamera_mianode_jni.xiaomi.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libcameraimpl.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libcameramind.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_PRODUCT)/lib64/libopencl-camera.so
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so
 
 # ODM & System_ext camera tuning configs
 PRODUCT_COPY_FILES += \
@@ -74,6 +82,11 @@ PRODUCT_SYSTEM_PROPERTIES += \
     ro.product.mod_device=breeze_in \
     ro.miui.customized.region=india \
     ro.miui.notch=1 \
+    persist.sys.miui.camera.protect_prev_ext=true \
+    camera.debug.mivi2=false \
+    persist.vendor.camera.mivi.version=1 \
+    vendor.camera.support.mivi=false \
+    hypercamera.disable_app_default_config=true \
     ro.com.google.lens.oem_camera_package=com.android.camera
 
 # SEPolicy
