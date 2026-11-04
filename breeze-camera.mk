@@ -12,9 +12,6 @@ PRODUCT_SOONG_NAMESPACES += $(CAMERA_PATH)
 PRODUCT_PACKAGES += \
     MiuiCamera \
     MiuiCameraOverlay \
-    miui-framework \
-    miui-cameraopt \
-    com.xiaomi.hardware.camera.companion-V1 \
     libcamera_algoup_jni.xiaomi \
     libcamera_mianode_jni.xiaomi \
     libcameraimpl \
@@ -43,7 +40,14 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/product/etc/permissions/privapp-permissions-com.android.camera.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-com.android.camera.xml \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/com.xiaomi.hardware.camera.companion.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/com.xiaomi.hardware.camera.companion.xml \
-    $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-cameraopt.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-cameraopt.xml
+    $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-cameraopt.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-cameraopt.xml \
+    $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-framework.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-framework.xml
+
+# Framework JARs
+PRODUCT_COPY_FILES += \
+    $(CAMERA_PATH)/proprietary/system_ext/framework/miui-framework.jar:$(TARGET_COPY_OUT_SYSTEM_EXT)/framework/miui-framework.jar \
+    $(CAMERA_PATH)/proprietary/system_ext/framework/miui-cameraopt.jar:$(TARGET_COPY_OUT_SYSTEM_EXT)/framework/miui-cameraopt.jar \
+    $(CAMERA_PATH)/proprietary/system_ext/framework/com.xiaomi.hardware.camera.companion-V1.jar:$(TARGET_COPY_OUT_SYSTEM_EXT)/framework/com.xiaomi.hardware.camera.companion-V1.jar
 
 # Linker Namespace Public Libraries
 PRODUCT_COPY_FILES += \
