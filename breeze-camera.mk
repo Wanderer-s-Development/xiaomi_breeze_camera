@@ -46,18 +46,14 @@ PRODUCT_COPY_FILES += \
 
 # Linker Namespace Public Libraries
 PRODUCT_COPY_FILES += \
-    $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_PRODUCT)/etc/public.libraries.txt \
-    $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/public.libraries.txt \
     $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_PRODUCT)/etc/public.libraries-xiaomi.txt \
-    $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/public.libraries-xiaomi.txt
+    $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/public.libraries-xiaomi.txt
 
 # Media Profiles
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/system/etc/media_profiles.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/media_profiles.xml \
-    $(CAMERA_PATH)/proprietary/system/etc/media_profiles_V1_0.dtd:$(TARGET_COPY_OUT_SYSTEM)/etc/media_profiles_V1_0.dtd \
     $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles.xml \
-    $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles_V1_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles_V1_0.xml \
-    $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles_ravelin.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles_ravelin.xml
+    $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles_V1_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles_V1_0.xml
 
 # JNI Libraries for MiuiCamera App
 PRODUCT_COPY_FILES += \
