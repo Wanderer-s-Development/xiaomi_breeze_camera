@@ -6,6 +6,8 @@
 
 CAMERA_PATH := vendor/xiaomi/breeze-camera
 
+PRODUCT_SOONG_NAMESPACES += $(CAMERA_PATH)
+
 # Inherit Soong packages
 PRODUCT_PACKAGES += \
     MiuiCamera \
