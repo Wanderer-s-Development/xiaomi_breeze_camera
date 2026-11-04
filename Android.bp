@@ -251,21 +251,7 @@ cc_prebuilt_library_shared {
     system_ext_specific: true,
 }
 
-cc_prebuilt_library_shared {
-    name: "com.qti.feature2.gs.netrani",
-    owner: "qcom",
-    strip: {
-        none: true,
-    },
-    target: {
-        android_arm64: {
-            srcs: ["proprietary/vendor/lib64/com.qti.feature2.gs.netrani.so"],
-        },
-    },
-    compile_multilib: "64",
-    check_elf_files: false,
-    soc_specific: true,
-}
+// com.qti.feature2.gs.netrani is already provided by vendor/xiaomi/breeze/Android.bp
 
 cc_prebuilt_library_shared {
     name: "com.xiaomi.plugin.morphohdr",
