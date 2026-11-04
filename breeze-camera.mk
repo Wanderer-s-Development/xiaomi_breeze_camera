@@ -11,6 +11,7 @@ PRODUCT_SOONG_NAMESPACES += $(CAMERA_PATH)
 # Inherit Soong packages
 PRODUCT_PACKAGES += \
     MiuiCamera \
+    MiuiCameraOverlay \
     miui-framework \
     miui-cameraopt \
     com.xiaomi.hardware.camera.companion-V1 \
