@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-CAMERA_PATH := $(call my-dir)
+CAMERA_PATH := vendor/xiaomi/breeze-camera
 
 # Inherit Soong packages
 PRODUCT_PACKAGES += \
