@@ -51,6 +51,7 @@ PRODUCT_COPY_FILES += \
 
 # Linker Namespace Public Libraries
 PRODUCT_COPY_FILES += \
+    $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/public.libraries.txt \
     $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_PRODUCT)/etc/public.libraries-xiaomi.txt \
     $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/public.libraries-xiaomi.txt
 
@@ -60,13 +61,13 @@ PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles.xml \
     $(CAMERA_PATH)/proprietary/vendor/etc/media_profiles_V1_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/media_profiles_V1_0.xml
 
-# JNI Libraries for MiuiCamera App
+# JNI Libraries for MiuiCamera App (system_ext, matching app partition)
 PRODUCT_COPY_FILES += \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libcameramind.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_PRODUCT)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_algoup_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcamera_algoup_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcameramind.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so
 
 # ODM & System_ext camera tuning configs
 PRODUCT_COPY_FILES += \
@@ -92,5 +93,5 @@ PRODUCT_SYSTEM_PROPERTIES += \
     hypercamera.disable_app_default_config=true \
     ro.com.google.lens.oem_camera_package=com.android.camera
 
-# SEPolicy
-BOARD_VENDOR_SEPOLICY_DIRS += $(CAMERA_PATH)/sepolicy/vendor
+# SEPolicy — NOTE: BOARD_VENDOR_SEPOLICY_DIRS must be set in device BoardConfig.mk
+# See device/xiaomi/breeze/BoardConfig.mk for the camera sepolicy dir inclusion
