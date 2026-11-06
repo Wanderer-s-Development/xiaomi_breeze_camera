@@ -40,35 +40,31 @@ def main():
     dex = bytearray(apk_data[data_off:data_off+dex_size])
     assert dex[:4] == b"dex\n", "DEX magic mismatch!"
 
-    # 1. Patch LA/t1;->run()V: bypass MIVILutSaver persist test and CameraOptManager check
-    orig_t1 = dex[0x5129f6:0x5129fa]
-    if orig_t1 == bytes.fromhex("62043ba5"):
-        print("[+] Patching LA/t1;->run()V -> return-void at 0x5129f6...")
-        dex[0x5129f6:0x5129fa] = bytes.fromhex("0e000000")
-    elif orig_t1 == bytes.fromhex("0e000000"):
-        print("[*] LA/t1;->run()V already patched.")
+    # 1. Patch LA/t1;->run()V:
+    # At offset 0x512a6e: '39 04 10 00' (if-nez v4, 0053)
+    # Change to '28 10 00 00' (goto 0053, nop)
+    # This skips MIVILutSaver test write failure and sendEmptyMessage(13) ("permission are limited").
+    orig_msg13_branch = dex[0x512a6e:0x512a72]
+    if orig_msg13_branch == bytes.fromhex("39041000"):
+        print("[+] Patching LA/t1;->run()V LutSaver branch -> goto 0053 at 0x512a6e...")
+        dex[0x512a6e:0x512a72] = bytes.fromhex("28100000")
+    elif orig_msg13_branch == bytes.fromhex("28100000"):
+        print("[*] LA/t1;->run()V LutSaver branch already patched.")
     else:
-        raise ValueError(f"Unexpected bytes at 0x5129f6: {orig_t1.hex()}")
+        raise ValueError(f"Unexpected bytes at 0x512a6e: {orig_msg13_branch.hex()}")
 
-    # 2. Patch ActivityBase$c Message 13 (0xd) handler: remove "permission are limited" toast
-    orig_msg13 = dex[0x80c05c:0x80c060]
-    if orig_msg13 == bytes.fromhex("140df20a"):
-        print("[+] Patching ActivityBase$c message 13 handler -> return-void at 0x80c05c...")
-        dex[0x80c05c:0x80c06a] = bytes.fromhex("0e00000000000000000000000e00")
-    elif orig_msg13 == bytes.fromhex("0e000000"):
-        print("[*] ActivityBase$c message 13 handler already patched.")
+    # 2. Patch LA/t1;->run()V:
+    # At offset 0x512a92: '39 04 30 00' (if-nez v4, 0085)
+    # Change to '28 30 00 00' (goto 0085, nop)
+    # This skips CameraOptManager reflection check and sendEmptyMessage(11) ("APK version error, exit in 3s").
+    orig_msg11_branch = dex[0x512a92:0x512a96]
+    if orig_msg11_branch == bytes.fromhex("39043000"):
+        print("[+] Patching LA/t1;->run()V CameraOpt branch -> goto 0085 at 0x512a92...")
+        dex[0x512a92:0x512a96] = bytes.fromhex("28300000")
+    elif orig_msg11_branch == bytes.fromhex("28300000"):
+        print("[*] LA/t1;->run()V CameraOpt branch already patched.")
     else:
-        raise ValueError(f"Unexpected bytes at 0x80c05c: {orig_msg13.hex()}")
-
-    # 3. Patch ActivityBase$c Message 11 (0xb) handler: remove "on APK version error" dialog
-    orig_msg11 = dex[0x80c0ae:0x80c0b2]
-    if orig_msg11 == bytes.fromhex("220d9424"):
-        print("[+] Patching ActivityBase$c message 11 handler -> return-void at 0x80c0ae...")
-        dex[0x80c0ae:0x80c0b2] = bytes.fromhex("0e000000")
-    elif orig_msg11 == bytes.fromhex("0e000000"):
-        print("[*] ActivityBase$c message 11 handler already patched.")
-    else:
-        raise ValueError(f"Unexpected bytes at 0x80c0ae: {orig_msg11.hex()}")
+        raise ValueError(f"Unexpected bytes at 0x512a92: {orig_msg11_branch.hex()}")
 
     # Recalculate DEX checksums
     print("[+] Recalculating SHA1, Adler32, and CRC32 for classes.dex...")
