@@ -34,11 +34,17 @@ PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_in.xml \
     $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_p_in.xml \
     $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_in_pa.xml \
-    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_in_global.xml
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/device_features/breeze_in_global.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/device_features/breeze.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/device_features/breeze_in.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/device_features/breeze_p_in.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/device_features/breeze_in_pa.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/device_features/breeze_in_global.xml
 
 # Permissions
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/product/etc/permissions/privapp-permissions-com.android.camera.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-com.android.camera.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/permissions/privapp-permissions-com.android.camera.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-com.android.camera.xml \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/com.xiaomi.hardware.camera.companion.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/com.xiaomi.hardware.camera.companion.xml \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-cameraopt.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-cameraopt.xml \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-framework.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-framework.xml
@@ -50,6 +56,7 @@ PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/system_ext/framework/com.xiaomi.hardware.camera.companion-V1.jar:$(TARGET_COPY_OUT_SYSTEM_EXT)/framework/com.xiaomi.hardware.camera.companion-V1.jar
 
 # Linker Namespace Public Libraries
+PRODUCT_COPY_FILES := $(filter-out system/core/rootdir/etc/public.libraries.android.txt:system/etc/public.libraries.txt,$(PRODUCT_COPY_FILES))
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/public.libraries.txt \
     $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_PRODUCT)/etc/public.libraries-xiaomi.txt \
@@ -79,17 +86,20 @@ PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/system_ext/etc/cameraopt_thirdParty.json:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/cameraopt_thirdParty.json \
     $(CAMERA_PATH)/proprietary/system_ext/etc/camerascene.json:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/camerascene.json
 
-# Properties
-PRODUCT_SYSTEM_PROPERTIES += \
+# Vendor Properties
+PRODUCT_VENDOR_PROPERTIES += \
     vendor.camera.aux.packagelist=com.android.camera,org.lineageos.aperture \
     persist.vendor.camera.privapp.list=com.android.camera \
+    persist.vendor.camera.mivi.version=1 \
+    vendor.camera.support.mivi=false
+
+# System Properties
+PRODUCT_SYSTEM_PROPERTIES += \
     ro.product.mod_device=breeze_in \
     ro.miui.customized.region=india \
     ro.miui.notch=1 \
     persist.sys.miui.camera.protect_prev_ext=true \
     camera.debug.mivi2=false \
-    persist.vendor.camera.mivi.version=1 \
-    vendor.camera.support.mivi=false \
     hypercamera.disable_app_default_config=true \
     ro.com.google.lens.oem_camera_package=com.android.camera
 
