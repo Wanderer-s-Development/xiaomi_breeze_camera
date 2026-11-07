@@ -59,6 +59,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES := $(filter-out system/core/rootdir/etc/public.libraries.android.txt:system/etc/public.libraries.txt,$(PRODUCT_COPY_FILES))
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/public.libraries.txt \
+    $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_PRODUCT)/etc/public.libraries.txt \
+    $(CAMERA_PATH)/proprietary/product/etc/public.libraries.txt:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/public.libraries.txt \
     $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_PRODUCT)/etc/public.libraries-xiaomi.txt \
     $(CAMERA_PATH)/proprietary/product/etc/public.libraries-xiaomi.txt:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/public.libraries-xiaomi.txt
 
