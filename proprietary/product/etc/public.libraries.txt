@@ -84,3 +84,8 @@ libcameraopt.so 64 nopreload
 libcameraopt_jni.so 64 nopreload
 libbpf_bcc.so nopreload
 libbpf_minimal.so nopreload
+libmialgoengine.so 64 nopreload
+libmialgoengine2.so 64 nopreload
+libcom.xiaomi.pluginutils.so 64 nopreload
+libcom.xiaomi.metadatautils.so 64 nopreload
+libgrallocutils.so 64 nopreload
