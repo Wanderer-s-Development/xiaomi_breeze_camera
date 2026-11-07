@@ -1,0 +1,11 @@
+# Allow platform_app and platform_app_36 (com.android.camera / MiuiCamera) to access camera provider and postproc
+hal_client_domain({ platform_app platform_app_36 }, vendor_hal_camerapostproc_xiaomi)
+
+binder_use(platform_app_36)
+binder_call({ platform_app platform_app_36 }, vendor_hal_camerapostproc_xiaomi)
+binder_call({ platform_app platform_app_36 }, hal_camera_default)
+allow { platform_app platform_app_36 } hal_camera_default:fd use;
+allow { platform_app platform_app_36 } vendor_camera_data_file:dir create_dir_perms;
+allow { platform_app platform_app_36 } vendor_camera_data_file:file create_file_perms;
+get_prop({ platform_app platform_app_36 }, vendor_camera_sensor_prop)
+allow { platform_app platform_app_36 } vendor_file:file { read getattr open map execute };
