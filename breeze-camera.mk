@@ -74,7 +74,9 @@ PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcamera_mianode_jni.xiaomi.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcamera_mianode_jni.xiaomi.so \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraimpl.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcameraimpl.so \
     $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameramind.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcameramind.so \
-    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libopencl-camera.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libopencl-camera.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraopt.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcameraopt.so \
+    $(CAMERA_PATH)/proprietary/system_ext/lib64/libcameraopt_jni.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/priv-app/MiuiCamera/lib/arm64/libcameraopt_jni.so
 
 # ODM & System_ext camera tuning configs
 PRODUCT_COPY_FILES += \

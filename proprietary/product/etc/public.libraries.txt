@@ -82,3 +82,5 @@ libcameraimpl.so 64 nopreload
 libcameramind.so 64 nopreload
 libcameraopt.so 64 nopreload
 libcameraopt_jni.so 64 nopreload
+libbpf_bcc.so nopreload
+libbpf_minimal.so nopreload

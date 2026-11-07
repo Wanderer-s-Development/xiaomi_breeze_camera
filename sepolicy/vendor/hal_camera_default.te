@@ -1,4 +1,5 @@
 binder_call(hal_camera_default, priv_app)
-binder_call(hal_camera_default, { platform_app platform_app_36 })
+binder_call(hal_camera_default, platform_app)
+binder_call(hal_camera_default, platform_app_36)
 allow hal_camera_default priv_app:fd use;
 allow hal_camera_default { platform_app platform_app_36 }:fd use;
