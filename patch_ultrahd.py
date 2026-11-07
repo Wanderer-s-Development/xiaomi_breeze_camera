@@ -32,11 +32,14 @@ def main():
     with open(APK_PATH, "rb") as f:
         apk_data = bytearray(f.read())
 
-    # Locate classes2.dex within uncompressed / stored zip
-    dex2_local_hdr = 23153120
-    assert apk_data[dex2_local_hdr:dex2_local_hdr+4] == b"PK\x03\x04", "Local header signature mismatch!"
-    dex2_data_off = 23153168
-    dex2_size = 10348448
+    with zipfile.ZipFile(APK_PATH, "r") as z:
+        info = z.getinfo("classes2.dex")
+        dex2_local_hdr = info.header_offset
+        assert apk_data[dex2_local_hdr:dex2_local_hdr+4] == b"PK\x03\x04", "Local header signature mismatch!"
+        fn_len = struct.unpack("<H", apk_data[dex2_local_hdr+26:dex2_local_hdr+28])[0]
+        extra_len = struct.unpack("<H", apk_data[dex2_local_hdr+28:dex2_local_hdr+30])[0]
+        dex2_data_off = dex2_local_hdr + 30 + fn_len + extra_len
+        dex2_size = info.file_size
 
     dex2 = bytearray(apk_data[dex2_data_off:dex2_data_off+dex2_size])
     assert len(dex2) == dex2_size, f"Size mismatch: {len(dex2)} != {dex2_size}"
@@ -79,8 +82,26 @@ def main():
     apk_data[dex2_data_off:dex2_data_off+dex2_size] = dex2
     # Update local file header CRC32
     apk_data[dex2_local_hdr+14:dex2_local_hdr+18] = struct.pack("<I", new2_crc)
-    # Update central directory CRC32
-    apk_data[184984143:184984147] = struct.pack("<I", new2_crc)
+    # Find and update central directory entry CRC32
+    eocd_pos = apk_data.rfind(b"PK\x05\x06")
+    assert eocd_pos != -1
+    cd_size = struct.unpack("<I", apk_data[eocd_pos+12:eocd_pos+16])[0]
+    cd_off = struct.unpack("<I", apk_data[eocd_pos+16:eocd_pos+20])[0]
+
+    p = cd_off
+    found_cd = False
+    while p < cd_off + cd_size:
+        assert apk_data[p:p+4] == b"PK\x01\x02"
+        fn_l = struct.unpack("<H", apk_data[p+28:p+30])[0]
+        ex_l = struct.unpack("<H", apk_data[p+30:p+32])[0]
+        cm_l = struct.unpack("<H", apk_data[p+32:p+34])[0]
+        fn = apk_data[p+46:p+46+fn_l].decode("ascii", errors="ignore")
+        if fn == "classes2.dex":
+            apk_data[p+16:p+20] = struct.pack("<I", new2_crc)
+            found_cd = True
+            break
+        p += 46 + fn_l + ex_l + cm_l
+    assert found_cd, "classes2.dex not found in Central Directory!"
 
     with open(APK_PATH, "wb") as f:
         f.write(apk_data)
