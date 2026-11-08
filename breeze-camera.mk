@@ -45,13 +45,16 @@ PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/device_features/breeze_in_pa.xml \
     $(CAMERA_PATH)/proprietary/product/etc/device_features/breeze.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/device_features/breeze_in_global.xml
 
-# Permissions
+# Permissions & Sysconfig
 PRODUCT_COPY_FILES += \
     $(CAMERA_PATH)/proprietary/product/etc/permissions/privapp-permissions-com.android.camera.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-com.android.camera.xml \
     $(CAMERA_PATH)/proprietary/product/etc/permissions/privapp-permissions-com.android.camera.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-com.android.camera.xml \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/com.xiaomi.hardware.camera.companion.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/com.xiaomi.hardware.camera.companion.xml \
     $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-cameraopt.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-cameraopt.xml \
-    $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-framework.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-framework.xml
+    $(CAMERA_PATH)/proprietary/system_ext/etc/permissions/miui-framework.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/miui-framework.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/sysconfig/miuicamera-hiddenapi-package-allowlist.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/sysconfig/miuicamera-hiddenapi-package-allowlist.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/sysconfig/miuicamera-hiddenapi-package-allowlist.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/sysconfig/miuicamera-hiddenapi-package-allowlist.xml \
+    $(CAMERA_PATH)/proprietary/product/etc/sysconfig/miuicamera-hiddenapi-package-allowlist.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/sysconfig/miuicamera-hiddenapi-package-allowlist.xml
 
 # Framework JARs
 PRODUCT_COPY_FILES += \
