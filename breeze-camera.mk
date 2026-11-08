@@ -30,7 +30,10 @@ PRODUCT_PACKAGES += \
     com.xiaomi.plugin.skinbeautifier \
     com.xiaomi.plugin.mibokeh \
     com.xiaomi.plugin.superlowlight \
-    com.xiaomi.plugin.swflip
+    com.xiaomi.plugin.swflip \
+    libanc_single_bokeh \
+    libanc_single_bokeh_rear \
+    libanc_single_rt_bokeh
 
 # Device Features (breeze 108MP HM6 support)
 PRODUCT_COPY_FILES += \

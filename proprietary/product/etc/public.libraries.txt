@@ -99,3 +99,6 @@ libmorpho_ImageRefinerLite.so 64 nopreload
 libmpbase.so 64 nopreload
 libTrueSight.so 64 nopreload
 libanc_night.so 64 nopreload
+libanc_single_bokeh.so 64 nopreload
+libanc_single_bokeh_rear.so 64 nopreload
+libanc_single_rt_bokeh.so 64 nopreload
