@@ -26,7 +26,11 @@ PRODUCT_PACKAGES += \
     libmqsas \
     vendor.xiaomi.hardware.campostproc@1.0-system_ext \
     com.qti.feature2.gs.netrani \
-    com.xiaomi.plugin.morphohdr
+    com.xiaomi.plugin.morphohdr \
+    com.xiaomi.plugin.skinbeautifier \
+    com.xiaomi.plugin.mibokeh \
+    com.xiaomi.plugin.superlowlight \
+    com.xiaomi.plugin.swflip
 
 # Device Features (breeze 108MP HM6 support)
 PRODUCT_COPY_FILES += \

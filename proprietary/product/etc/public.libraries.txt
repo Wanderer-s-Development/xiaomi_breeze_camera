@@ -89,3 +89,13 @@ libmialgoengine2.so 64 nopreload
 libcom.xiaomi.pluginutils.so 64 nopreload
 libcom.xiaomi.metadatautils.so 64 nopreload
 libgrallocutils.so 64 nopreload
+com.xiaomi.plugin.morphohdr.so 64 nopreload
+com.xiaomi.plugin.skinbeautifier.so 64 nopreload
+com.xiaomi.plugin.mibokeh.so 64 nopreload
+com.xiaomi.plugin.superlowlight.so 64 nopreload
+com.xiaomi.plugin.swflip.so 64 nopreload
+libmorpho_ImageRefiner.so 64 nopreload
+libmorpho_ImageRefinerLite.so 64 nopreload
+libmpbase.so 64 nopreload
+libTrueSight.so 64 nopreload
+libanc_night.so 64 nopreload
