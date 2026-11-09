@@ -105,11 +105,15 @@ PRODUCT_VENDOR_PROPERTIES += \
     vendor.camera.aux.packagelist=com.android.camera,org.lineageos.aperture \
     persist.vendor.camera.privapp.list=com.android.camera \
     persist.vendor.camera.mivi.version=1 \
-    vendor.camera.support.mivi=false
+    vendor.camera.support.mivi=false \
+    persist.camera.eis.enable=1 \
+    persist.vendor.camera.video.eis=1 \
+    persist.vendor.camera.eis.enable=1
 
 # System Properties
 PRODUCT_SYSTEM_PROPERTIES += \
-    ro.product.mod_device=breeze_in \
+    ro.product.mod_device=breeze_in_global \
+    ro.miui.build.region=in \
     ro.miui.customized.region=india \
     ro.miui.notch=1 \
     persist.sys.miui.camera.protect_prev_ext=true \
