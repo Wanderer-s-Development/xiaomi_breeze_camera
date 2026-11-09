@@ -69,18 +69,6 @@ def main():
     else:
         raise ValueError(f"Unexpected bytes at 0x4710a0: {orig_downscale.hex()}")
 
-    # 3. Patch LZ5/e;->V1(LZ5/d;)Z -> return true (Enable HDR in Camera UI)
-    # Original: 12 00 38 05 48 00 54 51 (const/4 v0, 0; if-eqz v5, +0x0048; iget-object v1, v5, LZ5/d;->G0)
-    # Patched:  12 10 0f 00 00 00 00 00 (const/4 v0, 1; return v0; nop; nop; nop; nop)
-    orig_hdr = dex2[0x2eabd8:0x2eabd8+8]
-    if orig_hdr == bytes.fromhex("1200380548005451"):
-        print("[+] Patching LZ5/e;->V1(LZ5/d;)Z -> return true (enable HDR)...")
-        dex2[0x2eabd8:0x2eabd8+8] = bytes.fromhex("12100f0000000000")
-    elif orig_hdr == bytes.fromhex("12100f0000000000"):
-        print("[*] LZ5/e;->V1 is already patched (return true).")
-    else:
-        raise ValueError(f"Unexpected bytes at 0x2eabd8: {orig_hdr.hex()}")
-
     # Recalculate checksums for classes2.dex
     print("[+] Recalculating SHA1, Adler32, and CRC32 checksums...")
     new2_sha1 = hashlib.sha1(dex2[32:]).digest()
