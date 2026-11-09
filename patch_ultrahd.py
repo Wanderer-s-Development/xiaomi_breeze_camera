@@ -69,6 +69,18 @@ def main():
     else:
         raise ValueError(f"Unexpected bytes at 0x4710a0: {orig_downscale.hex()}")
 
+    # 3. Patch Camera2Module.isParallel -> return false (instant inline capture, fixes 4-take freeze with ZSL)
+    # Original: 22 00 2f 28 (new-instance v0, Ljava/lang/StringBuilder;)
+    # Patched:  12 00 0f 00 (const/4 v0, 0; return v0)
+    orig_parallel_c2m = dex2[0x463094:0x463094+4]
+    if orig_parallel_c2m == bytes.fromhex("22002f28"):
+        print("[+] Patching Camera2Module.isParallel -> return false...")
+        dex2[0x463094:0x463094+4] = bytes.fromhex("12000f00")
+    elif orig_parallel_c2m == bytes.fromhex("12000f00"):
+        print("[*] Camera2Module.isParallel is already patched.")
+    else:
+        raise ValueError(f"Unexpected bytes at 0x463094: {orig_parallel_c2m.hex()}")
+
     # Recalculate checksums for classes2.dex
     print("[+] Recalculating SHA1, Adler32, and CRC32 checksums...")
     new2_sha1 = hashlib.sha1(dex2[32:]).digest()
