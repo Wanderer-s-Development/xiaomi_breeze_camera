@@ -587,7 +587,7 @@
     <!-- whether support dynamic light spot in portrait module  -->
     <bool name="support_camera_dynamic_light_spot">true</bool>
     <!--whether support aohdr in camera-->
-    <bool name="support_camera_aohdr">false</bool>
+    <bool name="support_camera_aohdr">true</bool>
     <!--whether support high frame recording in camera-->
     <bool name="support_camera_hfr">true</bool>
     <!--whether freeze preview after hdr capture in camera-->
