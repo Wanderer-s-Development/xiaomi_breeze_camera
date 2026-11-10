@@ -14,7 +14,9 @@ echo "==> Preparing clean workspace at $WORK_DIR..."
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR/META-INF/com/google/android"
 
-# System_ext paths (matching Infinity-X ROM partition layout)
+# System and system_ext paths (matching Infinity-X ROM partition layout)
+mkdir -p "$WORK_DIR/system/etc"
+mkdir -p "$WORK_DIR/system/system_ext/etc"
 mkdir -p "$WORK_DIR/system/system_ext/priv-app/MiuiCamera/lib/arm64"
 mkdir -p "$WORK_DIR/system/system_ext/lib64"
 mkdir -p "$WORK_DIR/system/system_ext/etc/permissions"
@@ -23,10 +25,10 @@ echo "==> Creating module.prop..."
 cat << 'EOF' > "$WORK_DIR/module.prop"
 id=hyperos_camera_breeze_fix
 name=HyperOS Camera Fix (breeze)
-version=v2.4-fixed
-versionCode=240
+version=v2.5-fixed
+versionCode=250
 author=Wanderer's Development
-description=Fix for HyperOS Camera on breeze. Platform-signed APK (v16/640003210). Fixes Photo (4-take freeze bypassed with full parallel bypass), Portrait (single bokeh role 63), Night (no CamX RAW crash), 108MP Ultra HD, and native Watermarks. Session init preserved (no launch crash).
+description=Fix for HyperOS Camera on breeze. Platform-signed APK (v17/640003211). Fixes launch VerifyError in Z5.e.V1, UnsatisfiedLinkError via public.libraries.txt, photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, Night CamX RAW fix, 108MP Ultra HD, and native Watermarks.
 EOF
 
 echo "==> Creating META-INF updater scripts..."
@@ -88,6 +90,18 @@ set_perm_recursive "$MODPATH/system" 0 0 0755 0644
 set_perm_recursive "$MODPATH/system/system_ext/priv-app/MiuiCamera" 0 0 0755 0644
 set_perm_recursive "$MODPATH/system/system_ext/priv-app/MiuiCamera/lib" 0 0 0755 0755
 set_perm_recursive "$MODPATH/system/system_ext/priv-app/MiuiCamera/lib/arm64" 0 0 0755 0644
+set_perm "$MODPATH/system/etc/public.libraries.txt" 0 0 0644 2>/dev/null || true
+set_perm "$MODPATH/system/system_ext/etc/public.libraries.txt" 0 0 0644 2>/dev/null || true
+
+# Grant camera and media storage permissions to prevent File NullPointerException
+ui_print "- Granting camera and media storage permissions..."
+pm grant com.android.camera android.permission.READ_MEDIA_IMAGES 2>/dev/null || true
+pm grant com.android.camera android.permission.READ_MEDIA_VIDEO 2>/dev/null || true
+pm grant com.android.camera android.permission.CAMERA 2>/dev/null || true
+pm grant com.android.camera android.permission.RECORD_AUDIO 2>/dev/null || true
+pm grant com.android.camera android.permission.ACCESS_FINE_LOCATION 2>/dev/null || true
+pm grant com.android.camera android.permission.ACCESS_COARSE_LOCATION 2>/dev/null || true
+appops set com.android.camera MANAGE_EXTERNAL_STORAGE allow 2>/dev/null || true
 
 ui_print "- Module successfully installed!"
 ui_print "- Please reboot your device to apply the fix."
@@ -106,6 +120,11 @@ done
 # Force native Zero Shutter Lag mode (replaces camera.disable_zsl_mode=true)
 # for continuous 3A Auto White Balance / Auto Exposure convergence
 resetprop -n camera.disable_zsl_mode 0
+
+# Ensure full storage / media permissions are granted after boot
+appops set com.android.camera MANAGE_EXTERNAL_STORAGE allow 2>/dev/null || true
+pm grant com.android.camera android.permission.READ_MEDIA_IMAGES 2>/dev/null || true
+pm grant com.android.camera android.permission.READ_MEDIA_VIDEO 2>/dev/null || true
 EOF
 chmod 755 "$WORK_DIR/service.sh"
 
@@ -123,8 +142,9 @@ echo "==> Copying platform-signed MiuiCamera.apk and proprietary libraries..."
 APK_SRC="${DIR}/proprietary/product/priv-app/MiuiCamera/MiuiCamera.apk"
 SYSTEM_EXT_LIB="${DIR}/proprietary/system_ext/lib64"
 PERM_SRC="${DIR}/proprietary/product/etc/permissions/privapp-permissions-com.android.camera.xml"
+PUBLIC_LIB_SRC="${DIR}/proprietary/product/etc/public.libraries.txt"
 
-# 1. Platform-signed MiuiCamera.apk (patched with Camera2Module.isParallel -> false)
+# 1. Platform-signed MiuiCamera.apk
 cp -af "$APK_SRC" "$WORK_DIR/system/system_ext/priv-app/MiuiCamera/MiuiCamera.apk"
 
 # 2. Complete JNI libraries for MiuiCamera (prevent missing library crashes)
@@ -144,6 +164,13 @@ done
 
 # 3. Privapp permissions
 cp -af "$PERM_SRC" "$WORK_DIR/system/system_ext/etc/permissions/privapp-permissions-com.android.camera.xml"
+
+# 4. Public libraries declarations (ensures dynamic linker allows apps to load private platform/HAL libs)
+if [ -f "$PUBLIC_LIB_SRC" ]; then
+  cp -af "$PUBLIC_LIB_SRC" "$WORK_DIR/system/etc/public.libraries.txt"
+  cp -af "$PUBLIC_LIB_SRC" "$WORK_DIR/system/system_ext/etc/public.libraries.txt"
+  echo "[+] Installed public.libraries.txt to system/etc and system_ext/etc"
+fi
 
 echo "==> Creating Magisk ZIP: $OUT_ZIP..."
 rm -f "$OUT_ZIP"
