@@ -23,10 +23,10 @@ echo "==> Creating module.prop..."
 cat << 'EOF' > "$WORK_DIR/module.prop"
 id=hyperos_camera_breeze_fix
 name=HyperOS Camera Fix (breeze)
-version=v2.3-fixed
-versionCode=230
+version=v2.4-fixed
+versionCode=240
 author=Wanderer's Development
-description=Fix for HyperOS Camera on breeze. Platform-signed APK (v15/640003209). Fixes Portrait (single bokeh role 63), Night (no CamX RAW crash), Photo (no 4-take freeze/ZSL), 108MP Ultra HD, and native Watermark saving.
+description=Fix for HyperOS Camera on breeze. Platform-signed APK (v16/640003210). Fixes Photo (4-take freeze bypassed with full parallel bypass), Portrait (single bokeh role 63), Night (no CamX RAW crash), 108MP Ultra HD, and native Watermarks. Session init preserved (no launch crash).
 EOF
 
 echo "==> Creating META-INF updater scripts..."
