@@ -25,10 +25,10 @@ echo "==> Creating module.prop..."
 cat << 'EOF' > "$WORK_DIR/module.prop"
 id=hyperos_camera_breeze_fix
 name=HyperOS Camera Fix (breeze)
-version=v2.5-fixed
-versionCode=250
+version=v2.6-fixed
+versionCode=260
 author=Wanderer's Development
-description=Fix for HyperOS Camera on breeze. Platform-signed APK (v17/640003211). Fixes launch VerifyError in Z5.e.V1, UnsatisfiedLinkError via public.libraries.txt, photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, Night CamX RAW fix, 108MP Ultra HD, and native Watermarks.
+description=Fix for HyperOS Camera on breeze. Platform-signed APK (v18/640003212). Fixes 108MP Ultra HD photo saving, fixes Watermark shutter freeze (isCloudWatermarkProcessing bypassed), fixes launch VerifyError in Z5.e.V1, fixes UnsatisfiedLinkError via public.libraries.txt, fixes photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, and Night CamX RAW fix.
 EOF
 
 echo "==> Creating META-INF updater scripts..."
