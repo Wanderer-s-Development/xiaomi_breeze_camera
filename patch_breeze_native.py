@@ -19,9 +19,10 @@ Applies targeted Smali fixes to OUR native MiuiCamera.apk for breeze:
    - Restores isParallel() and isShot2GalleryOrEnableParallel() to return true for
      moduleIndex == 0xaf (Ultra HD) or instanceof PixelModule.
    - Allows 108MP frames to be processed and saved without dropping!
-6. Watermark Fix (Shutter lockup fix):
+6. Watermark Fix (Shutter lockup fix & _global offline watermark):
    - Camera2Module.isCloudWatermarkProcessing() -> false.
    - Prevents cloud watermark synchronization from permanently blocking shutter (isBlockSnap).
+   - W2/c.smali: forces _global branch to bypass China online font sync.
    - Skia native watermark rendering preserved without shutter freeze.
 7. Portrait Mode:
    - Camera2Module.updatePortraitBokehRole() -> role 0x3f (role 63, Single Sensor Bokeh).
@@ -53,7 +54,7 @@ CERT_PEM = "/serverhive5/wandererdev/infinityx/vendor/infinity-priv/keys/platfor
 ZIPALIGN = "/serverhive5/wandererdev/infinityx/prebuilts/build-tools/linux-x86/bin/zipalign"
 
 REPO_APK = "/serverhive5/wandererdev/infinityx/vendor/xiaomi/breeze-camera/proprietary/product/priv-app/MiuiCamera/MiuiCamera.apk"
-OUT_APK_V18 = "/serverhive5/wandererdev/MiuiCamera_breeze_fixed_v18_640003212.apk"
+OUT_APK_V19 = "/serverhive5/wandererdev/MiuiCamera_breeze_fixed_v19_640003213.apk"
 
 def patch_file(path, old_pattern, new_pattern, label):
     with open(path, "r") as f:
@@ -395,6 +396,35 @@ def main():
             "Camera2Module.isCloudWatermarkProcessing -> false (eliminates watermark shutter lockup)"
         )
 
+        # =====================================================================
+        # 6. Watermark _global fix: W2/c.smali (force _global to bypass online font sync)
+        # =====================================================================
+        w2c_smali = os.path.join(smali2_dir, "W2/c.smali")
+        old_w2c = """:cond_31
+    const-string v0, "ro.product.mod_device"
+
+    const-string v1, ""
+
+    invoke-static {v0, v1}, Lic/f;->b(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_44
+
+    const-string v1, "_global"
+
+    invoke-virtual {v0, v1}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_44
+
+    goto :goto_52"""
+
+        new_w2c = """:cond_31
+    goto :goto_52"""
+        patch_file(w2c_smali, old_w2c, new_w2c, "W2/c.smali force _global for watermark signature font")
+
         old_bokeh_role = """    :cond_69
     const/16 v1, 0x3d
 
@@ -406,7 +436,7 @@ def main():
         patch_file(c2m_smali, old_bokeh_role, new_bokeh_role, "Camera2Module.updatePortraitBokehRole -> role 0x3f (63)")
 
         # =====================================================================
-        # 6. H3/f.smali: Portrait ShotTypeHandler -> shotType 0
+        # 7. H3/f.smali: Portrait ShotTypeHandler -> shotType 0
         # =====================================================================
         h3f_smali = os.path.join(smali2_dir, "H3/f.smali")
         patch_method(
@@ -427,7 +457,7 @@ def main():
         )
 
         # =====================================================================
-        # 7. NightModule.smali: raw callback, graph descriptor, parallel bypass
+        # 8. NightModule.smali: raw callback, graph descriptor, parallel bypass
         # =====================================================================
         nm_smali = os.path.join(smali2_dir, "com/android/camera/features/mode/night/photo/NightModule.smali")
         patch_method(
@@ -477,7 +507,7 @@ def main():
         )
 
         # =====================================================================
-        # 8. H3/i.smali: Night ShotTypeHandler -> shotType 0
+        # 9. H3/i.smali: Night ShotTypeHandler -> shotType 0
         # =====================================================================
         h3i_smali = os.path.join(smali2_dir, "H3/i.smali")
         patch_method(
@@ -498,7 +528,7 @@ def main():
         )
 
         # =====================================================================
-        # 9. D5/c.smali: Watermark NPE Fix
+        # 10. D5/c.smali: Watermark NPE Fix
         # =====================================================================
         d5c_smali = os.path.join(smali2_dir, "D5/c.smali")
         old_d5c_b = """.method public static b(Landroid/hardware/camera2/CaptureResult;)Lua/b;
@@ -552,7 +582,7 @@ def main():
         patch_file(d5c_smali, old_d5c_call, new_d5c_call, "D5/c caller null-check on ICustomCaptureResult")
 
         # =====================================================================
-        # 10. DocModuleEntry.smali: Disable Document mode
+        # 11. DocModuleEntry.smali: Disable Document mode
         # =====================================================================
         doc_smali = os.path.join(smali2_dir, "com/android/camera/features/mode/doc/DocModuleEntry.smali")
         patch_method(
@@ -569,7 +599,7 @@ def main():
         )
 
         # =====================================================================
-        # 11. Reassemble classes2.dex and classes4.dex
+        # 12. Reassemble classes2.dex and classes4.dex
         # =====================================================================
         new_dex2 = os.path.join(td, "classes2_new.dex")
         print("[*] Reassembling classes2.dex with smali...")
@@ -580,7 +610,7 @@ def main():
         subprocess.run(["smali", "a", smali4_dir, "-o", new_dex4], check=True)
 
         # =====================================================================
-        # 12. Pack into APK, bump versionCode 640003207 -> 640003212
+        # 13. Pack into APK, bump versionCode 640003207 -> 640003213
         # =====================================================================
         raw_apk = os.path.join(td, "repacked.apk")
         aligned_apk = os.path.join(td, "aligned.apk")
@@ -599,10 +629,10 @@ def main():
                             data = df.read()
                         print(f"[+] Replaced classes4.dex in APK ({len(data)} bytes)")
                     elif item.filename == "AndroidManifest.xml":
-                        # Bump 640003207 (87ac2526) -> 640003212 (8cac2526)
+                        # Bump 640003207 (87ac2526) -> 640003213 (8dac2526)
                         if b"\x87\xac\x25\x26" in data:
-                            data = data.replace(b"\x87\xac\x25\x26", b"\x8c\xac\x25\x26", 1)
-                            print("[+] Bumped versionCode to 640003212 in AndroidManifest.xml")
+                            data = data.replace(b"\x87\xac\x25\x26", b"\x8d\xac\x25\x26", 1)
+                            print("[+] Bumped versionCode to 640003213 in AndroidManifest.xml")
                     zout.writestr(item, data)
 
         print("[*] Aligning APK with zipalign...")
@@ -616,17 +646,17 @@ def main():
             "--v3-signing-enabled", "true",
             "--key", KEY_PK8,
             "--cert", CERT_PEM,
-            "--out", OUT_APK_V18,
+            "--out", OUT_APK_V19,
             aligned_apk
         ], check=True)
 
         print("[*] Verifying output APK...")
-        subprocess.run(["apksigner", "verify", "-v", OUT_APK_V18], check=True)
-        print(f"[+] SUCCESS! Created {OUT_APK_V18}")
+        subprocess.run(["apksigner", "verify", "-v", OUT_APK_V19], check=True)
+        print(f"[+] SUCCESS! Created {OUT_APK_V19}")
 
         # Also copy to repo proprietary location
         print(f"[*] Updating repo vendor APK: {REPO_APK}")
-        shutil.copy2(OUT_APK_V18, REPO_APK)
+        shutil.copy2(OUT_APK_V19, REPO_APK)
         print(f"[+] Successfully copied to {REPO_APK}")
 
 if __name__ == "__main__":
