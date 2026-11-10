@@ -26,10 +26,10 @@ echo "==> Creating module.prop..."
 cat << 'EOF' > "$WORK_DIR/module.prop"
 id=hyperos_camera_breeze_fix
 name=HyperOS Camera Fix (breeze)
-version=v2.8-fixed
-versionCode=280
+version=v2.9-fixed
+versionCode=290
 author=Wanderer's Development
-description=Fix for HyperOS Camera on breeze. Platform-signed APK (v20/640003214). Fixes watermark green corrupted band via GPU glFinish tile cache flush, forces Redmi 13 5G device watermark naming, forces _global mod_device and device_features for offline watermark, fixes 108MP Ultra HD photo saving, fixes Watermark shutter freeze (isCloudWatermarkProcessing bypassed), fixes launch VerifyError in Z5.e.V1, fixes UnsatisfiedLinkError via public.libraries.txt, fixes photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, and Night CamX RAW fix.
+description=Fix for HyperOS Camera on breeze. Platform-signed APK (v22/640003220). Completely disables watermark across photos and UI (eliminates green corrupted bands and bluish chroma inversions, forces 100% direct hardware JPEG compression). Fixes 108MP Ultra HD photo saving, fixes launch VerifyError in Z5.e.V1, fixes UnsatisfiedLinkError via public.libraries.txt, fixes photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, and Night CamX RAW fix.
 EOF
 
 echo "==> Creating META-INF updater scripts..."

@@ -537,7 +537,7 @@
     <!--whether listen frame with single subthread looper in camera-->
     <bool name="is_camera_preview_with_subthread_looper">true</bool>
     <!--whether add watermark in camera app-->
-    <bool name="is_camera_app_water_mark">true</bool>
+    <bool name="is_camera_app_water_mark">false</bool>
     <!--whether support tiltshift  in camera-->
     <bool name="support_camera_tilt_shift">true</bool>
     <!--whether support magic mirror in camera-->
@@ -573,11 +573,11 @@
     <!--whether support record location in camera-->
     <bool name="support_camera_record_location">true</bool>
     <!--whether support time watermark in camera-->
-    <bool name="support_camera_water_mark">true</bool>
+    <bool name="support_camera_water_mark">false</bool>
     <!--whether support new style time watermark in camera-->
-    <bool name="support_camera_new_style_time_water_mark">true</bool>
+    <bool name="support_camera_new_style_time_water_mark">false</bool>
     <!--whether support face info watermark in camera-->
-    <bool name="support_camera_face_info_water_mark">true</bool>
+    <bool name="support_camera_face_info_water_mark">false</bool>
     <!--whether support square mode in camera-->
     <bool name="support_camera_square_mode">true</bool>
     <!--whether support pause recording in camera-->
@@ -599,7 +599,7 @@
     <!--whether support peaking mf in camera-->
     <bool name="support_camera_peaking_mf">true</bool>
     <!--whether support add watermark on bottom left of picture-->
-    <bool name="support_picture_watermark">true</bool>
+    <bool name="support_picture_watermark">false</bool>
     <!--whether support psensor in pocket mode (true by default)-->
     <bool name="support_psensor_pocket_mode">false</bool>
     <bool name="support_object_track">false</bool>

@@ -62,7 +62,8 @@ CERT_PEM = "/serverhive5/wandererdev/infinityx/vendor/infinity-priv/keys/platfor
 ZIPALIGN = "/serverhive5/wandererdev/infinityx/prebuilts/build-tools/linux-x86/bin/zipalign"
 
 REPO_APK = "/serverhive5/wandererdev/infinityx/vendor/xiaomi/breeze-camera/proprietary/product/priv-app/MiuiCamera/MiuiCamera.apk"
-OUT_APK_V20 = "/serverhive5/wandererdev/MiuiCamera_breeze_fixed_v20_640003214.apk"
+OUT_APK_V22 = "/serverhive5/wandererdev/MiuiCamera_breeze_fixed_v22_640003220.apk"
+OUT_APK_STANDALONE = "/serverhive5/wandererdev/MiuiCamera.apk"
 
 def patch_file(path, old_pattern, new_pattern, label):
     with open(path, "r") as f:
@@ -743,7 +744,174 @@ def main():
         patch_file(g7c_smali, old_g7c, new_g7c, "G7/c.<clinit> force isGlobal m = true")
 
         # =====================================================================
-        # 15. Reassemble classes.dex, classes2.dex, and classes4.dex
+        # 15. COMPLETE WATERMARK DISABLEMENT (App & UI)
+        # =====================================================================
+        # A. classes.dex: Master watermark toggle x9/K.f() -> false
+        x9k_smali = os.path.join(smali1_dir, "x9/K.smali")
+        patch_method(
+            x9k_smali,
+            r"\.method public static f\(\)Z.*?\n\.end method",
+            """.method public static f()Z
+    .registers 1
+
+    const/4 v0, 0x0
+
+    return v0
+.end method""",
+            "x9/K.f() (isWatermarkEnable master check) -> false"
+        )
+
+        # B. classes.dex: Preference getters in com/android/camera/data/data/i.smali -> false
+        cdata_i_smali = os.path.join(smali1_dir, "com/android/camera/data/data/i.smali")
+        patch_method(
+            cdata_i_smali,
+            r"\.method public static o0\(\)Z.*?\n\.end method",
+            """.method public static o0()Z
+    .registers 1
+
+    const/4 v0, 0x0
+
+    return v0
+.end method""",
+            "com.android.camera.data.data.i.o0() (device watermark) -> false"
+        )
+
+        patch_method(
+            cdata_i_smali,
+            r"\.method public static t0\(\)Z.*?\n\.end method",
+            """.method public static t0()Z
+    .registers 1
+
+    const/4 v0, 0x0
+
+    return v0
+.end method""",
+            "com.android.camera.data.data.i.t0() (front camera watermark) -> false"
+        )
+
+        patch_method(
+            cdata_i_smali,
+            r"\.method public static b1\(\)Z.*?\n\.end method",
+            """.method public static b1()Z
+    .registers 1
+
+    const/4 v0, 0x0
+
+    return v0
+.end method""",
+            "com.android.camera.data.data.i.b1() (time watermark) -> false"
+        )
+
+        # C. classes.dex: Custom/artistic watermark in com/android/camera/data/data/t.smali -> false
+        cdata_t_smali = os.path.join(smali1_dir, "com/android/camera/data/data/t.smali")
+        patch_method(
+            cdata_t_smali,
+            r"\.method public static s0\(\)Z.*?\n\.end method",
+            """.method public static s0()Z
+    .registers 1
+
+    const/4 v0, 0x0
+
+    return v0
+.end method""",
+            "com.android.camera.data.data.t.s0() (art watermark) -> false"
+        )
+
+        # D. classes.dex: b0/o0.smali getItems() -> empty list
+        b0o0_smali = os.path.join(smali1_dir, "b0/o0.smali")
+        patch_method(
+            b0o0_smali,
+            r"\.method public final getItems\(\)Ljava/util/List;.*?\n\.end method",
+            """.method public final getItems()Ljava/util/List;
+    .registers 2
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "()",
+            "Ljava/util/List<",
+            "Lcom/android/camera/data/data/d;",
+            ">;"
+        }
+    .end annotation
+
+    new-instance v0, Ljava/util/ArrayList;
+
+    invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
+
+    return-object v0
+.end method""",
+            "b0/o0.getItems() (ComponentConfigWatermark items) -> empty list"
+        )
+
+        # E. classes2.dex: Hide Watermark Preference from Camera Settings UI
+        ccpf_smali = os.path.join(smali2_dir, "com/android/camera/fragment/settings/CameraCapturePreferenceFragment.smali")
+        old_ccpf = """    invoke-static {}, LZ/a;->g()Le0/p;
+
+    move-result-object v4
+
+    invoke-virtual {v4}, Le0/p;->O()Z
+
+    move-result v4
+
+    if-eqz v4, :cond_20
+
+    const-string v4, "pref_camera_watermark_type_key\""""
+
+        new_ccpf = """    invoke-static {}, LZ/a;->g()Le0/p;
+
+    move-result-object v4
+
+    invoke-virtual {v4}, Le0/p;->O()Z
+
+    move-result v4
+
+    goto :cond_20
+
+    const-string v4, "pref_camera_watermark_type_key\""""
+        patch_file(ccpf_smali, old_ccpf, new_ccpf, "CameraCapturePreferenceFragment hide watermark setting")
+
+        # F. classes2.dex: Remove Watermark Item from Top Menu Bar
+        top_util_smali = os.path.join(smali2_dir, "com/android/camera2/compat/theme/custom/mm/top/TopConfigItemUtil.smali")
+        patch_method(
+            top_util_smali,
+            r"\.method public final getWatermarkItemBuilder\(\)Lr2/e\$a;.*?\n\.end method",
+            """.method public final getWatermarkItemBuilder()Lr2/e$a;
+    .registers 2
+
+    invoke-virtual {p0}, Lcom/android/camera2/compat/theme/custom/mm/top/TopConfigItemUtil;->getInvalidItemBuilder()Lr2/e$a;
+
+    move-result-object v0
+
+    return-object v0
+.end method""",
+            "TopConfigItemUtil.getWatermarkItemBuilder() -> getInvalidItemBuilder()"
+        )
+
+        patch_method(
+            top_util_smali,
+            r"\.method private final getPrivacyWatermarkItemBuilder\(\)Lr2/e\$a;.*?\n\.end method",
+            """.method private final getPrivacyWatermarkItemBuilder()Lr2/e$a;
+    .registers 2
+
+    invoke-virtual {p0}, Lcom/android/camera2/compat/theme/custom/mm/top/TopConfigItemUtil;->getInvalidItemBuilder()Lr2/e$a;
+
+    move-result-object v0
+
+    return-object v0
+.end method""",
+            "TopConfigItemUtil.getPrivacyWatermarkItemBuilder() -> getInvalidItemBuilder()"
+        )
+
+        # G. classes2.dex: d1/a.smali remove ambilight watermark item
+        d1a_smali = os.path.join(smali2_dir, "d1/a.smali")
+        patch_file(
+            d1a_smali,
+            "    const/16 v1, 0xdf\n\n    iput v1, v0, Lr2/e$a;->a:I",
+            "    const/16 v1, 0xb0\n\n    iput v1, v0, Lr2/e$a;->a:I",
+            "d1/a.b() disable ambilight watermark item"
+        )
+
+        # =====================================================================
+        # 16. Reassemble classes.dex, classes2.dex, and classes4.dex
         # =====================================================================
         new_dex1 = os.path.join(td, "classes_new.dex")
         print("[*] Reassembling classes.dex with smali...")
@@ -758,7 +926,7 @@ def main():
         subprocess.run(["smali", "a", smali4_dir, "-o", new_dex4], check=True)
 
         # =====================================================================
-        # 16. Pack into APK, bump versionCode 640003207 -> 640003214
+        # 17. Pack into APK, bump versionCode 640003207 -> 640003220
         # =====================================================================
         raw_apk = os.path.join(td, "repacked.apk")
         aligned_apk = os.path.join(td, "aligned.apk")
@@ -781,10 +949,10 @@ def main():
                             data = df.read()
                         print(f"[+] Replaced classes4.dex in APK ({len(data)} bytes)")
                     elif item.filename == "AndroidManifest.xml":
-                        # Bump 640003207 (87ac2526) -> 640003214 (8eac2526)
+                        # Bump 640003207 (87ac2526) -> 640003220 (94ac2526)
                         if b"\x87\xac\x25\x26" in data:
-                            data = data.replace(b"\x87\xac\x25\x26", b"\x8e\xac\x25\x26", 1)
-                            print("[+] Bumped versionCode to 640003214 in AndroidManifest.xml")
+                            data = data.replace(b"\x87\xac\x25\x26", b"\x94\xac\x25\x26", 1)
+                            print("[+] Bumped versionCode to 640003220 in AndroidManifest.xml")
                     zout.writestr(item, data)
 
         print("[*] Aligning APK with zipalign...")
@@ -798,18 +966,22 @@ def main():
             "--v3-signing-enabled", "true",
             "--key", KEY_PK8,
             "--cert", CERT_PEM,
-            "--out", OUT_APK_V20,
+            "--out", OUT_APK_V22,
             aligned_apk
         ], check=True)
 
         print("[*] Verifying output APK...")
-        subprocess.run(["apksigner", "verify", "-v", OUT_APK_V20], check=True)
-        print(f"[+] SUCCESS! Created {OUT_APK_V20}")
+        subprocess.run(["apksigner", "verify", "-v", OUT_APK_V22], check=True)
+        print(f"[+] SUCCESS! Created {OUT_APK_V22}")
 
-        # Also copy to repo proprietary location
+        # Also copy to repo proprietary location and standalone location
         print(f"[*] Updating repo vendor APK: {REPO_APK}")
-        shutil.copy2(OUT_APK_V20, REPO_APK)
+        shutil.copy2(OUT_APK_V22, REPO_APK)
         print(f"[+] Successfully copied to {REPO_APK}")
+
+        print(f"[*] Updating standalone APK: {OUT_APK_STANDALONE}")
+        shutil.copy2(OUT_APK_V22, OUT_APK_STANDALONE)
+        print(f"[+] Successfully copied to {OUT_APK_STANDALONE}")
 
 if __name__ == "__main__":
     main()
