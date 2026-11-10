@@ -38,6 +38,14 @@ Applies targeted Smali fixes to OUR native MiuiCamera.apk for breeze:
    - Null-safety checks in D5/c.smali for CaptureResult and ICustomCaptureResult.
 10. Documents:
    - DocModuleEntry.support() -> false (keeps Document mode disabled).
+11. Watermark Green Bar & Corruption Fix (GPU Sync):
+   - Inserts GLES20.glFinish() before CameraNativeTool.compressHardwareBuffer() in V0/f.smali and J9/f.smali.
+   - Inserts GLES20.glFinish() before V0/f.d(Rect) in I/a.smali.
+   - Guarantees Adreno GPU flushes tile cache and chroma (UV) plane to AHardwareBuffer before CPU lock.
+12. Watermark Device Model Fix ("Redmi 13 5G"):
+   - G7/b.w() -> false.
+   - G7/b.m() -> unconditionally selects index 1 ("13 5G") instead of index 0 ("Note 13R").
+   - G7/c.<clinit>() -> unconditionally sets m (isGlobal) to true.
 """
 
 import os
@@ -54,7 +62,7 @@ CERT_PEM = "/serverhive5/wandererdev/infinityx/vendor/infinity-priv/keys/platfor
 ZIPALIGN = "/serverhive5/wandererdev/infinityx/prebuilts/build-tools/linux-x86/bin/zipalign"
 
 REPO_APK = "/serverhive5/wandererdev/infinityx/vendor/xiaomi/breeze-camera/proprietary/product/priv-app/MiuiCamera/MiuiCamera.apk"
-OUT_APK_V19 = "/serverhive5/wandererdev/MiuiCamera_breeze_fixed_v19_640003213.apk"
+OUT_APK_V20 = "/serverhive5/wandererdev/MiuiCamera_breeze_fixed_v20_640003214.apk"
 
 def patch_file(path, old_pattern, new_pattern, label):
     with open(path, "r") as f:
@@ -88,14 +96,20 @@ def main():
     assert os.path.exists(APK_IN), f"APK_IN not found: {APK_IN}"
 
     with tempfile.TemporaryDirectory() as td:
+        dex1_path = os.path.join(td, "classes.dex")
+        smali1_dir = os.path.join(td, "smali1")
         dex2_path = os.path.join(td, "classes2.dex")
         smali2_dir = os.path.join(td, "smali2")
         dex4_path = os.path.join(td, "classes4.dex")
         smali4_dir = os.path.join(td, "smali4")
 
         with zipfile.ZipFile(APK_IN, "r") as z:
+            z.extract("classes.dex", td)
             z.extract("classes2.dex", td)
             z.extract("classes4.dex", td)
+
+        print("[*] Disassembling classes.dex...")
+        subprocess.run(["baksmali", "d", dex1_path, "-o", smali1_dir], check=True)
 
         print("[*] Disassembling classes2.dex...")
         subprocess.run(["baksmali", "d", dex2_path, "-o", smali2_dir], check=True)
@@ -599,8 +613,142 @@ def main():
         )
 
         # =====================================================================
-        # 12. Reassemble classes2.dex and classes4.dex
+        # 12. GPU SYNC FIX: classes.dex (Eliminate Neon Green Watermark Band)
         # =====================================================================
+        v0f_smali = os.path.join(smali1_dir, "V0/f.smali")
+        old_v0f_compress = """    iget-boolean v7, p0, LV0/d;->d:Z
+
+    invoke-static {v4, v6, v7, v5, v3}, Lcom/xiaomi/gl/texture/CameraNativeTool;->compressHardwareBuffer(Landroid/hardware/HardwareBuffer;[IZIZ)[B"""
+
+        new_v0f_compress = """    iget-boolean v7, p0, LV0/d;->d:Z
+
+    invoke-static {}, Landroid/opengl/GLES20;->glFinish()V
+
+    invoke-static {v4, v6, v7, v5, v3}, Lcom/xiaomi/gl/texture/CameraNativeTool;->compressHardwareBuffer(Landroid/hardware/HardwareBuffer;[IZIZ)[B"""
+        patch_file(v0f_smali, old_v0f_compress, new_v0f_compress, "V0/f.smali glFinish before compressHardwareBuffer")
+
+        old_v0f_candy = """    invoke-virtual {v4, p0, v5}, Lcom/xiaomi/milab/filtersdk/CandySDK;->c(Ljava/lang/Object;[F)V
+
+    invoke-virtual {v4}, Lcom/xiaomi/milab/filtersdk/CandySDK;->e()V"""
+
+        new_v0f_candy = """    invoke-virtual {v4, p0, v5}, Lcom/xiaomi/milab/filtersdk/CandySDK;->c(Ljava/lang/Object;[F)V
+
+    invoke-virtual {v4}, Lcom/xiaomi/milab/filtersdk/CandySDK;->e()V
+
+    invoke-static {}, Landroid/opengl/GLES20;->glFinish()V"""
+        patch_file(v0f_smali, old_v0f_candy, new_v0f_candy, "V0/f.smali glFinish after CandySDK.e()")
+
+        ia_smali = os.path.join(smali1_dir, "I/a.smali")
+        old_ia_1 = """    :goto_455
+    invoke-virtual {v2, v1}, LV0/f;->d(Landroid/graphics/Rect;)V"""
+
+        new_ia_1 = """    :goto_455
+    invoke-static {}, Landroid/opengl/GLES20;->glFinish()V
+
+    invoke-virtual {v2, v1}, LV0/f;->d(Landroid/graphics/Rect;)V"""
+        patch_file(ia_smali, old_ia_1, new_ia_1, "I/a.smali location 1 glFinish before V0/f.d(Rect)")
+
+        old_ia_2 = """    move-object/from16 v3, v27
+
+    invoke-virtual {v3, v2}, LV0/f;->d(Landroid/graphics/Rect;)V"""
+
+        new_ia_2 = """    move-object/from16 v3, v27
+
+    invoke-static {}, Landroid/opengl/GLES20;->glFinish()V
+
+    invoke-virtual {v3, v2}, LV0/f;->d(Landroid/graphics/Rect;)V"""
+        patch_file(ia_smali, old_ia_2, new_ia_2, "I/a.smali location 2 glFinish before V0/f.d(Rect)")
+
+        # =====================================================================
+        # 13. GPU SYNC FIX: classes2.dex (J9/f.smali HardwareBufferToJpeg)
+        # =====================================================================
+        j9f_smali = os.path.join(smali2_dir, "J9/f.smali")
+        old_j9f = """    const/4 v5, 0x1
+
+    invoke-static {v0, v3, v2, v4, v5}, Lcom/xiaomi/gl/texture/CameraNativeTool;->compressHardwareBuffer(Landroid/hardware/HardwareBuffer;[IZIZ)[B"""
+
+        new_j9f = """    const/4 v5, 0x1
+
+    invoke-static {}, Landroid/opengl/GLES20;->glFinish()V
+
+    invoke-static {v0, v3, v2, v4, v5}, Lcom/xiaomi/gl/texture/CameraNativeTool;->compressHardwareBuffer(Landroid/hardware/HardwareBuffer;[IZIZ)[B"""
+        patch_file(j9f_smali, old_j9f, new_j9f, "J9/f.smali glFinish before compressHardwareBuffer")
+
+        # =====================================================================
+        # 14. WATERMARK DEVICE NAME FIX: classes4.dex (Force "Redmi 13 5G")
+        # =====================================================================
+        g7b_smali = os.path.join(smali4_dir, "G7/b.smali")
+        patch_method(
+            g7b_smali,
+            r"\.method public final w\(\)Z.*?\n\.end method",
+            """.method public final w()Z
+    .registers 2
+
+    const/4 v0, 0x0
+
+    return v0
+.end method""",
+            "G7/b.w() -> false (force non-China model)"
+        )
+
+        old_g7b_m = """:cond_1e4
+    invoke-virtual {v6, v2}, Landroid/util/SparseArray;->get(I)Ljava/lang/Object;
+
+    move-result-object p0
+
+    if-eqz p0, :cond_1f1
+
+    invoke-virtual {v6, v2}, Landroid/util/SparseArray;->get(I)Ljava/lang/Object;
+
+    move-result-object p0
+
+    check-cast p0, [Ljava/lang/String;
+
+    return-object p0"""
+
+        new_g7b_m = """:cond_1e4
+    invoke-virtual {v6, v1}, Landroid/util/SparseArray;->get(I)Ljava/lang/Object;
+
+    move-result-object p0
+
+    if-eqz p0, :cond_1f1
+
+    invoke-virtual {v6, v1}, Landroid/util/SparseArray;->get(I)Ljava/lang/Object;
+
+    move-result-object p0
+
+    check-cast p0, [Ljava/lang/String;
+
+    return-object p0"""
+        patch_file(g7b_smali, old_g7b_m, new_g7b_m, "G7/b.m() force index 1 ('13 5G') at cond_1e4")
+
+        g7c_smali = os.path.join(smali4_dir, "G7/c.smali")
+        old_g7c = """    const-string v0, "ro.product.mod_device"
+
+    invoke-static {v0, v3}, Lic/f;->b(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v0
+
+    const-string v3, "_global"
+
+    invoke-virtual {v0, v3}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+
+    move-result v0
+
+    sput-boolean v0, LG7/c;->m:Z"""
+
+        new_g7c = """    const/4 v0, 0x1
+
+    sput-boolean v0, LG7/c;->m:Z"""
+        patch_file(g7c_smali, old_g7c, new_g7c, "G7/c.<clinit> force isGlobal m = true")
+
+        # =====================================================================
+        # 15. Reassemble classes.dex, classes2.dex, and classes4.dex
+        # =====================================================================
+        new_dex1 = os.path.join(td, "classes_new.dex")
+        print("[*] Reassembling classes.dex with smali...")
+        subprocess.run(["smali", "a", smali1_dir, "-o", new_dex1], check=True)
+
         new_dex2 = os.path.join(td, "classes2_new.dex")
         print("[*] Reassembling classes2.dex with smali...")
         subprocess.run(["smali", "a", smali2_dir, "-o", new_dex2], check=True)
@@ -610,7 +758,7 @@ def main():
         subprocess.run(["smali", "a", smali4_dir, "-o", new_dex4], check=True)
 
         # =====================================================================
-        # 13. Pack into APK, bump versionCode 640003207 -> 640003213
+        # 16. Pack into APK, bump versionCode 640003207 -> 640003214
         # =====================================================================
         raw_apk = os.path.join(td, "repacked.apk")
         aligned_apk = os.path.join(td, "aligned.apk")
@@ -620,7 +768,11 @@ def main():
             with zipfile.ZipFile(raw_apk, "w") as zout:
                 for item in zin.infolist():
                     data = zin.read(item.filename)
-                    if item.filename == "classes2.dex":
+                    if item.filename == "classes.dex":
+                        with open(new_dex1, "rb") as df:
+                            data = df.read()
+                        print(f"[+] Replaced classes.dex in APK ({len(data)} bytes)")
+                    elif item.filename == "classes2.dex":
                         with open(new_dex2, "rb") as df:
                             data = df.read()
                         print(f"[+] Replaced classes2.dex in APK ({len(data)} bytes)")
@@ -629,10 +781,10 @@ def main():
                             data = df.read()
                         print(f"[+] Replaced classes4.dex in APK ({len(data)} bytes)")
                     elif item.filename == "AndroidManifest.xml":
-                        # Bump 640003207 (87ac2526) -> 640003213 (8dac2526)
+                        # Bump 640003207 (87ac2526) -> 640003214 (8eac2526)
                         if b"\x87\xac\x25\x26" in data:
-                            data = data.replace(b"\x87\xac\x25\x26", b"\x8d\xac\x25\x26", 1)
-                            print("[+] Bumped versionCode to 640003213 in AndroidManifest.xml")
+                            data = data.replace(b"\x87\xac\x25\x26", b"\x8e\xac\x25\x26", 1)
+                            print("[+] Bumped versionCode to 640003214 in AndroidManifest.xml")
                     zout.writestr(item, data)
 
         print("[*] Aligning APK with zipalign...")
@@ -646,17 +798,17 @@ def main():
             "--v3-signing-enabled", "true",
             "--key", KEY_PK8,
             "--cert", CERT_PEM,
-            "--out", OUT_APK_V19,
+            "--out", OUT_APK_V20,
             aligned_apk
         ], check=True)
 
         print("[*] Verifying output APK...")
-        subprocess.run(["apksigner", "verify", "-v", OUT_APK_V19], check=True)
-        print(f"[+] SUCCESS! Created {OUT_APK_V19}")
+        subprocess.run(["apksigner", "verify", "-v", OUT_APK_V20], check=True)
+        print(f"[+] SUCCESS! Created {OUT_APK_V20}")
 
         # Also copy to repo proprietary location
         print(f"[*] Updating repo vendor APK: {REPO_APK}")
-        shutil.copy2(OUT_APK_V19, REPO_APK)
+        shutil.copy2(OUT_APK_V20, REPO_APK)
         print(f"[+] Successfully copied to {REPO_APK}")
 
 if __name__ == "__main__":

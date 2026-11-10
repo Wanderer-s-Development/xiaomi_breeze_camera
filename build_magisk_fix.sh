@@ -26,10 +26,10 @@ echo "==> Creating module.prop..."
 cat << 'EOF' > "$WORK_DIR/module.prop"
 id=hyperos_camera_breeze_fix
 name=HyperOS Camera Fix (breeze)
-version=v2.7-fixed
-versionCode=270
+version=v2.8-fixed
+versionCode=280
 author=Wanderer's Development
-description=Fix for HyperOS Camera on breeze. Platform-signed APK (v19/640003213). Forces _global mod_device and device_features for offline watermark, fixes 108MP Ultra HD photo saving, fixes Watermark shutter freeze (isCloudWatermarkProcessing bypassed), fixes launch VerifyError in Z5.e.V1, fixes UnsatisfiedLinkError via public.libraries.txt, fixes photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, and Night CamX RAW fix.
+description=Fix for HyperOS Camera on breeze. Platform-signed APK (v20/640003214). Fixes watermark green corrupted band via GPU glFinish tile cache flush, forces Redmi 13 5G device watermark naming, forces _global mod_device and device_features for offline watermark, fixes 108MP Ultra HD photo saving, fixes Watermark shutter freeze (isCloudWatermarkProcessing bypassed), fixes launch VerifyError in Z5.e.V1, fixes UnsatisfiedLinkError via public.libraries.txt, fixes photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, and Night CamX RAW fix.
 EOF
 
 echo "==> Creating META-INF updater scripts..."
@@ -127,8 +127,9 @@ resetprop -n camera.disable_zsl_mode 0
 
 # Force global region and mod_device for offline watermark & Live Photo support
 resetprop -n ro.product.mod_device breeze_in_global
-resetprop -n ro.miui.customized.region global
-resetprop -n ro.miui.build.region global
+resetprop -n ro.miui.customized.region india
+resetprop -n ro.miui.build.region in
+resetprop -n ro.boot.hwc in
 
 # Ensure full storage / media permissions are granted after boot
 appops set com.android.camera MANAGE_EXTERNAL_STORAGE allow 2>/dev/null || true
@@ -147,8 +148,9 @@ resetprop -n camera.disable_zsl_mode 0
 
 # Set global region and mod_device at early boot
 resetprop -n ro.product.mod_device breeze_in_global
-resetprop -n ro.miui.customized.region global
-resetprop -n ro.miui.build.region global
+resetprop -n ro.miui.customized.region india
+resetprop -n ro.miui.build.region in
+resetprop -n ro.boot.hwc in
 EOF
 chmod 755 "$WORK_DIR/post-fs-data.sh"
 
