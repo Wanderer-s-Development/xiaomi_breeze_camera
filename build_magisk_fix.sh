@@ -14,9 +14,10 @@ echo "==> Preparing clean workspace at $WORK_DIR..."
 rm -rf "$WORK_DIR"
 mkdir -p "$WORK_DIR/META-INF/com/google/android"
 
-# System and system_ext paths (matching Infinity-X ROM partition layout)
-mkdir -p "$WORK_DIR/system/etc"
-mkdir -p "$WORK_DIR/system/system_ext/etc"
+# System, product, and system_ext paths (matching Infinity-X ROM partition layout)
+mkdir -p "$WORK_DIR/system/etc/device_features"
+mkdir -p "$WORK_DIR/system/product/etc/device_features"
+mkdir -p "$WORK_DIR/system/system_ext/etc/device_features"
 mkdir -p "$WORK_DIR/system/system_ext/priv-app/MiuiCamera/lib/arm64"
 mkdir -p "$WORK_DIR/system/system_ext/lib64"
 mkdir -p "$WORK_DIR/system/system_ext/etc/permissions"
@@ -25,10 +26,10 @@ echo "==> Creating module.prop..."
 cat << 'EOF' > "$WORK_DIR/module.prop"
 id=hyperos_camera_breeze_fix
 name=HyperOS Camera Fix (breeze)
-version=v2.6-fixed
-versionCode=260
+version=v2.7-fixed
+versionCode=270
 author=Wanderer's Development
-description=Fix for HyperOS Camera on breeze. Platform-signed APK (v18/640003212). Fixes 108MP Ultra HD photo saving, fixes Watermark shutter freeze (isCloudWatermarkProcessing bypassed), fixes launch VerifyError in Z5.e.V1, fixes UnsatisfiedLinkError via public.libraries.txt, fixes photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, and Night CamX RAW fix.
+description=Fix for HyperOS Camera on breeze. Platform-signed APK (v19/640003213). Forces _global mod_device and device_features for offline watermark, fixes 108MP Ultra HD photo saving, fixes Watermark shutter freeze (isCloudWatermarkProcessing bypassed), fixes launch VerifyError in Z5.e.V1, fixes UnsatisfiedLinkError via public.libraries.txt, fixes photo save NPE in l4.a.g, Photo 4-take freeze bypassed, Portrait role 63 single bokeh, and Night CamX RAW fix.
 EOF
 
 echo "==> Creating META-INF updater scripts..."
@@ -92,6 +93,9 @@ set_perm_recursive "$MODPATH/system/system_ext/priv-app/MiuiCamera/lib" 0 0 0755
 set_perm_recursive "$MODPATH/system/system_ext/priv-app/MiuiCamera/lib/arm64" 0 0 0755 0644
 set_perm "$MODPATH/system/etc/public.libraries.txt" 0 0 0644 2>/dev/null || true
 set_perm "$MODPATH/system/system_ext/etc/public.libraries.txt" 0 0 0644 2>/dev/null || true
+set_perm_recursive "$MODPATH/system/etc/device_features" 0 0 0755 0644 2>/dev/null || true
+set_perm_recursive "$MODPATH/system/system_ext/etc/device_features" 0 0 0755 0644 2>/dev/null || true
+set_perm_recursive "$MODPATH/system/product/etc/device_features" 0 0 0755 0644 2>/dev/null || true
 
 # Grant camera and media storage permissions to prevent File NullPointerException
 ui_print "- Granting camera and media storage permissions..."
@@ -121,6 +125,11 @@ done
 # for continuous 3A Auto White Balance / Auto Exposure convergence
 resetprop -n camera.disable_zsl_mode 0
 
+# Force global region and mod_device for offline watermark & Live Photo support
+resetprop -n ro.product.mod_device breeze_in_global
+resetprop -n ro.miui.customized.region global
+resetprop -n ro.miui.build.region global
+
 # Ensure full storage / media permissions are granted after boot
 appops set com.android.camera MANAGE_EXTERNAL_STORAGE allow 2>/dev/null || true
 pm grant com.android.camera android.permission.READ_MEDIA_IMAGES 2>/dev/null || true
@@ -135,6 +144,11 @@ MODDIR=${0%/*}
 
 # Set native ZSL at early boot
 resetprop -n camera.disable_zsl_mode 0
+
+# Set global region and mod_device at early boot
+resetprop -n ro.product.mod_device breeze_in_global
+resetprop -n ro.miui.customized.region global
+resetprop -n ro.miui.build.region global
 EOF
 chmod 755 "$WORK_DIR/post-fs-data.sh"
 
@@ -143,6 +157,7 @@ APK_SRC="${DIR}/proprietary/product/priv-app/MiuiCamera/MiuiCamera.apk"
 SYSTEM_EXT_LIB="${DIR}/proprietary/system_ext/lib64"
 PERM_SRC="${DIR}/proprietary/product/etc/permissions/privapp-permissions-com.android.camera.xml"
 PUBLIC_LIB_SRC="${DIR}/proprietary/product/etc/public.libraries.txt"
+DEVICE_FEATURES_DIR="${DIR}/proprietary/product/etc/device_features"
 
 # 1. Platform-signed MiuiCamera.apk
 cp -af "$APK_SRC" "$WORK_DIR/system/system_ext/priv-app/MiuiCamera/MiuiCamera.apk"
@@ -170,6 +185,14 @@ if [ -f "$PUBLIC_LIB_SRC" ]; then
   cp -af "$PUBLIC_LIB_SRC" "$WORK_DIR/system/etc/public.libraries.txt"
   cp -af "$PUBLIC_LIB_SRC" "$WORK_DIR/system/system_ext/etc/public.libraries.txt"
   echo "[+] Installed public.libraries.txt to system/etc and system_ext/etc"
+fi
+
+# 5. Device features XML configs (enforces device feature flags & global watermark)
+if [ -d "$DEVICE_FEATURES_DIR" ]; then
+  cp -af "$DEVICE_FEATURES_DIR"/* "$WORK_DIR/system/product/etc/device_features/"
+  cp -af "$DEVICE_FEATURES_DIR"/* "$WORK_DIR/system/system_ext/etc/device_features/"
+  cp -af "$DEVICE_FEATURES_DIR"/* "$WORK_DIR/system/etc/device_features/"
+  echo "[+] Installed device_features to product, system_ext, and system"
 fi
 
 echo "==> Creating Magisk ZIP: $OUT_ZIP..."
